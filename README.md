@@ -1,6 +1,6 @@
 # PBO_Tugas_2
 
-# Pembuatan API Pemesanan ViLla Sederhana Berbasis Java
+# Pembuatan API Pemesanan Villa Sederhana Berbasis Java
 Deskripsi Singkat disini
 
 # Identitas Kontributor
