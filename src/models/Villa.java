@@ -1,0 +1,21 @@
+package models;
+
+public class Villa {
+    private int id;
+    private String name;
+    private String description;
+    private String address;
+
+    public Villa(int id, String name, String description, String address) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.address = address;
+    }
+
+    // Getters
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public String getAddress() { return address; }
+}
