@@ -1,7 +1,7 @@
 package routes;
 
-import db.VillasDAO;
-import model.Villa;
+import handlers.VillasHandler;
+import models.Villa;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -28,11 +28,11 @@ public class VillasRoutes implements HttpHandler {
         switch (method) {
             case "GET":
                 if (path.matches("/villas/?")) {
-                    List<Villa> villas = VillasDAO.getAllVillas();
+                    List<Villa> villas = VillasHandler.getAllVillas();
                     sendJsonResponse(exchange, villas);
                     return;
                 } else if (path.matches("/villas/\\d+/?")) {
-                    response.put("message", "Villa details for ID");
+                    response.put("message", "Get Villa by ID");
                 } else if (path.matches("/villas/\\d+/rooms/?")) {
                     response.put("message", "Room details for villa");
                 } else if (path.matches("/villas/\\d+/bookings/?")) {
