@@ -54,18 +54,17 @@ public class VillasHandler {
 
     public static List<Map<String, Object>> getAvailableVillas(String ciDate, String coDate) {
         List<Map<String, Object>> villas = new ArrayList<>();
-        String sql = """
-        SELECT DISTINCT v.*
-        FROM villas v
-        JOIN room_types r ON r.villa = v.id
-        WHERE r.id NOT IN (
-            SELECT room_type
-            FROM bookings
-            WHERE NOT (
-                checkout_date <= ? OR checkin_date >= ?
-            )
-        )
-    """;
+        String sql =
+                "SELECT DISTINCT v.* " +
+                "FROM villas v " +
+                "JOIN room_types r ON r.villa = v.id " +
+                "WHERE r.id NOT IN ( " +
+                "    SELECT room_type " +
+                "    FROM bookings " +
+                "    WHERE NOT ( " +
+                "        checkout_date <= ? OR checkin_date >= ? " +
+                "    ) " +
+                ")";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, ciDate);
