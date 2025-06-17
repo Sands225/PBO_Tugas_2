@@ -37,9 +37,34 @@ public class CustomersRoutes implements HttpHandler {
             }
         } else if (method.equals("POST")) {
             if (path.matches("/customers/?")) {
-                response.put("message", "Register new customer");
+                InputStream is = exchange.getRequestBody();
+                Customer customer = mapper.readValue(is, Customer.class);
+
+                boolean success = CustomersHandler.addCustomer(customer);
+                if (success) {
+                    response.put("message", "Customer registered successfully.");
+                } else {
+                    exchange.sendResponseHeaders(400, 0);
+                    response.put("error", "Failed to register customer. Data might be invalid.");
+                }
+                sendResponse(exchange, response);
+                return;
             } else if (path.matches("/customers/\\d+/bookings/?")) {
-                response.put("message", "Customer books villa");
+                int customerId = Integer.parseInt(path.split("/")[2]);
+
+                InputStream is = exchange.getRequestBody();
+                Booking booking = mapper.readValue(is, Booking.class);
+                booking.setCustomer(customerId);
+
+                boolean success = BookingsHandler.insertBooking(booking);
+                if (success) {
+                    response.put("message", "Booking successfully created.");
+                } else {
+                    exchange.sendResponseHeaders(400, 0);
+                    response.put("error", "Failed to create booking. Check data validity.");
+                }
+                sendResponse(exchange, response);
+                return;
             } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
                 int bookingId = Integer.parseInt(path.split("/")[4]);
