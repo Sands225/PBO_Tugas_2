@@ -57,7 +57,7 @@ public class CustomersRoutes implements HttpHandler {
             int customerId = Integer.parseInt(path.split("/")[2]);
             InputStream is = exchange.getRequestBody();
             Customer customer = mapper.readValue(is, Customer.class);
-            customer.setId(customerId);  // Make sure Villa model has setId()
+            customer.setId(customerId);
 
             boolean success = CustomersHandler.updateCustomer(customer);
             if (success) {
