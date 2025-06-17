@@ -27,9 +27,13 @@ public class CustomersRoutes implements HttpHandler {
             } else if (path.matches("/customers/\\d+/?")) {
                 response.put("message", "Customer detail");
             } else if (path.matches("/customers/\\d+/bookings/?")) {
-                response.put("message", "Customer bookings");
+                int customerId = Integer.parseInt(path.split("/")[2]);
+                List<Map<String, Object>> bookings = BookingHandler.getBookingsByCustomerId(customerId);
+                response.put("bookings", bookings);
             } else if (path.matches("/customers/\\d+/reviews/?")) {
-                response.put("message", "Customer reviews");
+                int customerId = Integer.parseInt(path.split("/")[2]);
+                List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
+                response.put("reviews", reviews);
             }
         } else if (method.equals("POST")) {
             if (path.matches("/customers/?")) {
