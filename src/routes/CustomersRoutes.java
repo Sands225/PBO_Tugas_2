@@ -1,23 +1,24 @@
 package routes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import java.util.HashMap;
-import java.io.OutputStream;
+import handlers.*;
+import models.*;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import java.util.HashMap;
-import java.io.IOException;
-import java.io.OutputStream;
 
 public class CustomersRoutes implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
+        ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> response = new HashMap<>();
 
         if (method.equals("GET")) {
@@ -36,7 +37,21 @@ public class CustomersRoutes implements HttpHandler {
             } else if (path.matches("/customers/\\d+/bookings/?")) {
                 response.put("message", "Customer books villa");
             } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
-                response.put("message", "Customer review");
+                int customerId = Integer.parseInt(path.split("/")[2]);
+                int bookingId = Integer.parseInt(path.split("/")[4]);
+
+                InputStream is = exchange.getRequestBody();
+                Review review = mapper.readValue(is, Review.class);
+                review.setBooking(bookingId);
+
+                boolean success = ReviewsHandler.insertBookingReview(review);
+                if (success) {
+                    response.put("message", "Review has been successfully added");
+                } else {
+                    response.put("error", "Failed to add review");
+                }
+                sendResponse(exchange, response);
+                return;
             }
         } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
             response.put("message", "Update customer");
