@@ -33,4 +33,22 @@ public class ReviewsHandler {
         return reviews;
     }
 
+    public static boolean insertBookingReview(Review review) {
+        String sql =
+                "INSERT INTO reviews (booking, star, title, content)" +
+                "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, review.getBooking());
+            pstmt.setInt(2, review.getStar());
+            pstmt.setString(3, review.getTitle());
+            pstmt.setString(4, review.getContent());
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return  false;
+        }
+    }
 }
