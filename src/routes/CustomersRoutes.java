@@ -54,7 +54,19 @@ public class CustomersRoutes implements HttpHandler {
                 return;
             }
         } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
-            response.put("message", "Update customer");
+            int customerId = Integer.parseInt(path.split("/")[2]);
+            InputStream is = exchange.getRequestBody();
+            Customer customer = mapper.readValue(is, Customer.class);
+            customer.setId(customerId);  // Make sure Villa model has setId()
+
+            boolean success = CustomersHandler.updateCustomer(customer);
+            if (success) {
+                response.put("message", "Villa updated successfully");
+            } else {
+                response.put("error", "Failed to update villa");
+            }
+            sendResponse(exchange, response);
+            return;
         }
 
         sendResponse(exchange, response);
