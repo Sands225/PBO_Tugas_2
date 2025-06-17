@@ -1,4 +1,4 @@
-git package handlers;
+package handlers;
 
 import models.*;
 import db.Database;

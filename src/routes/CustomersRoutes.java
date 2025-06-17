@@ -1,6 +1,8 @@
 package routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.InputStream;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.OutputStream;
@@ -8,6 +10,11 @@ import java.io.OutputStream;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import handlers.RoomTypesHandler;
+import handlers.VillasHandler;
+import models.RoomType;
+import models.Villa;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
@@ -31,10 +38,7 @@ public class CustomersRoutes implements HttpHandler {
                 response.put("message", "Customer reviews");
             }
         } else if (method.equals("POST")) {
-            if (path.matches("/customers/?")) {
-                response.put("message", "Register new customer");
             } else if (path.matches("/customers/\\d+/bookings/?")) {
-                response.put("message", "Customer books villa");
             } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
                 response.put("message", "Customer review");
             }
