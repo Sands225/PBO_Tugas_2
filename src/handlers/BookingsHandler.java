@@ -7,12 +7,13 @@ import java.sql.*;
 import java.util.*;
 
 public class BookingsHandler {
+    // GET
     public static List<Map<String, Object>> getBookingsByVillaId(int villaId) {
         List<Map<String, Object>> bookings = new ArrayList<>();
         String sql =
-            "SELECT b.* FROM bookings b"+
-            "JOIN room_types rt ON b.room_type = rt.id"+
-            "WHERE rt.villa = ?";
+            "SELECT b.* FROM bookings b "+
+            "JOIN room_types rt ON b.room_type = rt.id "+
+            "WHERE rt.villa = ? ";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -42,7 +43,7 @@ public class BookingsHandler {
 
         return bookings;
     }
-
+  
     public static List<Map<String, Object>> getBookingsByCustomerId(int customerId) {
         List<Map<String, Object>> bookings = new ArrayList<>();
         String sql =
@@ -78,4 +79,9 @@ public class BookingsHandler {
 
         return bookings;
     }
+  
+    // POST
+//    public static boolean addBookingByCustomerId(Customer customer) {
+//
+//    }
 }
