@@ -11,9 +11,9 @@ public class BookingsHandler {
     public static List<Map<String, Object>> getBookingsByVillaId(int villaId) {
         List<Map<String, Object>> bookings = new ArrayList<>();
         String sql =
-            "SELECT b.* FROM bookings b "+
-            "JOIN room_types rt ON b.room_type = rt.id "+
-            "WHERE rt.villa = ? ";
+                "SELECT b.* FROM bookings b " +
+                        "JOIN room_types rt ON b.room_type = rt.id " +
+                        "WHERE rt.villa = ? ";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -43,12 +43,12 @@ public class BookingsHandler {
 
         return bookings;
     }
-  
+
     public static List<Map<String, Object>> getBookingsByCustomerId(int customerId) {
         List<Map<String, Object>> bookings = new ArrayList<>();
         String sql =
-                "SELECT b.* FROM bookings b "+
-                        "JOIN customers c ON c.id = b.customer "+
+                "SELECT b.* FROM bookings b " +
+                        "JOIN customers c ON c.id = b.customer " +
                         "WHERE c.id = ? ";
 
         try (Connection conn = Database.getConnection();
@@ -79,9 +79,36 @@ public class BookingsHandler {
 
         return bookings;
     }
-  
+
     // POST
-//    public static boolean addBookingByCustomerId(Customer customer) {
-//
-//    }
+        public static boolean insertBooking (Booking booking){
+            String sql = "INSERT INTO bookings (customer, room_type, checkin_date, checkout_date, price, voucher, final_price, payment_status, has_checkedin, has_checkedout) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (Connection conn = Database.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, booking.getCustomer());
+                pstmt.setInt(2, booking.getRoom_type());
+                pstmt.setString(3, booking.getCheckin_date());
+                pstmt.setString(4, booking.getCheckout_date());
+                pstmt.setInt(5, booking.getPrice());
+
+                if (booking.getVoucher() != null) {
+                    pstmt.setInt(6, booking.getVoucher());
+                } else {
+                    pstmt.setNull(6, java.sql.Types.INTEGER);
+                }
+
+                pstmt.setInt(7, booking.getFinal_price());
+                pstmt.setString(8, booking.getPayment_status());
+                pstmt.setInt(9, booking.getHas_checkedin());
+                pstmt.setInt(10, booking.getHas_checkedout());
+
+                return pstmt.executeUpdate() > 0;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 }
