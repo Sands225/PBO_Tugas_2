@@ -33,4 +33,48 @@ public class ReviewsHandler {
         return reviews;
     }
 
+    public static boolean insertBookingReview(Review review) {
+        String sql =
+                "INSERT INTO reviews (booking, star, title, content)" +
+                "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, review.getBooking());
+            pstmt.setInt(2, review.getStar());
+            pstmt.setString(3, review.getTitle());
+            pstmt.setString(4, review.getContent());
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return  false;
+        }
+    }
+    public static List<Map<String, Object>> getReviewsByCustomerId(int customerId) {
+        List<Map<String, Object>> reviews = new ArrayList<>();
+        String sql =
+                "SELECT rv.* " +
+                        "FROM reviews rv " +
+                        "JOIN bookings b ON rv.booking = b.id " +
+                        "JOIN customers c ON b.customer = c.id " +
+                        "WHERE b.customer = ? ";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> review = new HashMap<>();
+                review.put("booking", rs.getInt("booking"));
+                review.put("star", rs.getInt("star"));
+                review.put("title", rs.getString("title"));
+                review.put("content", rs.getString("content"));
+                reviews.add(review);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reviews;
+    }
+
 }
