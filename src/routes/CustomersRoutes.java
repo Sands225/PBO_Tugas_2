@@ -30,7 +30,9 @@ public class CustomersRoutes implements HttpHandler {
                 List<Map<String, Object>> bookings = BookingHandler.getBookingsByCustomerId(customerId);
                 response.put("bookings", bookings);
             } else if (path.matches("/customers/\\d+/reviews/?")) {
-
+                int customerId = Integer.parseInt(path.split("/")[2]);
+                List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
+                response.put("reviews", reviews);
             }
         } else if (method.equals("POST")) {
             if (path.matches("/customers/?")) {
