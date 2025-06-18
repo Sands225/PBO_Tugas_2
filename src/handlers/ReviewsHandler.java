@@ -51,4 +51,30 @@ public class ReviewsHandler {
             return  false;
         }
     }
+    public static List<Map<String, Object>> getReviewsByCustomerId(int customerId) {
+        List<Map<String, Object>> reviews = new ArrayList<>();
+        String sql =
+                "SELECT rv.* " +
+                        "FROM reviews rv " +
+                        "JOIN bookings b ON rv.booking = b.id " +
+                        "JOIN customers c ON b.customer = c.id " +
+                        "WHERE b.customer = ? ";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> review = new HashMap<>();
+                review.put("booking", rs.getInt("booking"));
+                review.put("star", rs.getInt("star"));
+                review.put("title", rs.getString("title"));
+                review.put("content", rs.getString("content"));
+                reviews.add(review);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reviews;
+    }
+
 }
