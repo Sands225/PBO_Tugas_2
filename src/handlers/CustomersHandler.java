@@ -7,19 +7,71 @@ import java.sql.*;
 import java.util.*;
 
 public class CustomersHandler {
-// GET
-//    public static List<Customer> getAllCustomers() {
-//
-//    }
+    // GET
+    public static List<Customer> getAllCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT * FROM customers";
 
-//    public static Customer getCustomerById(int id) {
-//
-//    }
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
+            while (rs.next()) {
+                Customer customer = new Customer(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("phone")
+                );
+                customers.add(customer);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customers;
+    }
+
+    public static Customer getCustomerById(int id) {
+        String sql = "SELECT * FROM customers WHERE id = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Customer(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("phone")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 // POST
-//    public static boolean addCustomer(Customer customer) {
-//
-//    }
+public static boolean addCustomer(Customer customer) {
+    String sql = "INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)";
+
+    try (Connection conn = Database.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        if (customer.getName() == null || customer.getEmail() == null || customer.getPhone() == null) {
+            throw new IllegalArgumentException("Name, email, and phone cannot be null.");
+        }
+
+        pstmt.setString(1, customer.getName());
+        pstmt.setString(2, customer.getEmail());
+        pstmt.setString(3, customer.getPhone());
+
+        return pstmt.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 
 // UPDATE
     public static boolean updateCustomer(Customer customer) {
