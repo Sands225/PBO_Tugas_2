@@ -18,20 +18,20 @@ public class Voucher {
     }
 
     public int getId() { return id; }
-    public void setId() { this.id = id; }
+    public void setId(int voucherId) { this.id = voucherId; }
 
     public String getCode() { return code; }
-    public void setCode() { this.code = code; }
+    public void setCode(String code) { this.code = code; }
 
     public String getDescription() { return description; }
-    public void setDescription() { this.description = description; }
+    public void setDescription(String description) { this.description = description; }
 
     public double getDiscount() { return discount; }
-    public void setDiscount() { this.discount = discount; }
+    public void setDiscount(Double discount) { this.discount = discount; }
 
     public String getStart_date() { return start_date; }
-    public void setStart_date() { this.start_date = start_date; }
+    public void setStart_date(String start_date) { this.start_date = start_date; }
 
     public String getEnd_date() { return end_date; }
-    public void setEnd_date() { this.end_date = end_date; }
+    public void setEnd_date(String end_date) { this.end_date = end_date; }
 }
