@@ -55,7 +55,6 @@ public class VouchersHandler {
         }
         return null;
     }
-<<<<<<< HEAD
 
     // POST
     public static boolean insertVoucher(Voucher voucher) {
@@ -97,8 +96,6 @@ public class VouchersHandler {
             return false;
         }
     }
-=======
->>>>>>> parent of 61327a6 (Merge pull request #19 from Sands225/sans)
   
     // DELETE
     public static boolean deleteVoucherById(int voucherId) {
