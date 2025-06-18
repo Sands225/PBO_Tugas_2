@@ -55,11 +55,20 @@ public class VouchersHandler {
         }
         return null;
     }
-
-    // POST
-
-
-    // PUT
-
+  
     // DELETE
+    public static boolean deleteVoucherById(int voucherId) {
+        String sql = "DELETE FROM vouchers WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, voucherId);
+            return pstmt.executeUpdate() > 0;
+          
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
