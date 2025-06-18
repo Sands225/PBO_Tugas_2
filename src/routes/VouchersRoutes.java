@@ -5,6 +5,7 @@ import models.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.InputStream;
 import java.util.*;
 import java.io.OutputStream;
 
@@ -39,7 +40,17 @@ public class VouchersRoutes implements HttpHandler {
                 return;
             }
         } else if (method.equals("POST") && path.matches("/vouchers/?")) {
-            response.put("message", "Create voucher");
+            InputStream is = exchange.getRequestBody();
+            Voucher voucher = mapper.readValue(is, Voucher.class);
+
+            boolean success = VouchersHandler.insertVoucher(voucher);
+            if (success) {
+                response.put("message", "Voucher created successfully");
+            } else {
+                response.put("error", "Failed to create voucher");
+            }
+            sendResponse(exchange, response);
+            return;
         } else if (method.equals("PUT") && path.matches("/vouchers/\\d+/?")) {
             response.put("message", "Update voucher");
         } else if (method.equals("DELETE") && path.matches("/vouchers/\\d+/?")) {
