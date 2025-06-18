@@ -5,7 +5,6 @@ import models.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.InputStream;
 import java.util.*;
 import java.io.OutputStream;
 
@@ -19,7 +18,6 @@ public class VouchersRoutes implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
-        ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> response = new HashMap<>();
 
         if (method.equals("GET")) {
@@ -28,29 +26,10 @@ public class VouchersRoutes implements HttpHandler {
                 sendJsonResponse(exchange, vouchers);
                 return;
             } else if (path.matches("/vouchers/\\d+/?")) {
-                int id = Integer.parseInt(path.replaceAll("\\D+", ""));
-                Voucher voucher = VouchersHandler.getVoucherById(id);
-                if (voucher != null) {
-                    sendJsonResponse(exchange, voucher);
-                } else {
-                    response.put("error", "Voucher not found");
-                    exchange.sendResponseHeaders(404, 0);
-                    exchange.getResponseBody().close();
-                }
-                return;
+                response.put("message", "Voucher detail");
             }
         } else if (method.equals("POST") && path.matches("/vouchers/?")) {
-            InputStream is = exchange.getRequestBody();
-            Voucher voucher = mapper.readValue(is, Voucher.class);
-
-            boolean success = VouchersHandler.insertVoucher(voucher);
-            if (success) {
-                response.put("message", "Voucher created successfully");
-            } else {
-                response.put("error", "Failed to create voucher");
-            }
-            sendResponse(exchange, response);
-            return;
+            response.put("message", "Create voucher");
         } else if (method.equals("PUT") && path.matches("/vouchers/\\d+/?")) {
             response.put("message", "Update voucher");
         } else if (method.equals("DELETE") && path.matches("/vouchers/\\d+/?")) {

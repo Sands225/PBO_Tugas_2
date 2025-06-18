@@ -77,6 +77,25 @@ public class VouchersHandler {
     }
 
     // PUT
+    public static boolean updateVoucher(Voucher voucher) {
+        String sql = "UPDATE vouchers SET code = ?, description = ?, discount = ?, start_date = ?, end_date = ? WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, voucher.getCode());
+            pstmt.setString(2, voucher.getDescription());
+            pstmt.setDouble(3, voucher.getDiscount());
+            pstmt.setString(4, voucher.getStart_date()); // Format: "YYYY-MM-DD hh:mm:ss"
+            pstmt.setString(5, voucher.getEnd_date());
+            pstmt.setInt(6, voucher.getId());
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
   
     // DELETE
     public static boolean deleteVoucherById(int voucherId) {
