@@ -55,19 +55,8 @@ public class VouchersHandler {
         }
         return null;
     }
-
-    // POST
-    // ERI
-
-    // ERI
-
-    // PUT
-    // ARYA
-
-    // ARYA
-
+  
     // DELETE
-    // PUTRA
     public static boolean deleteVoucherById(int voucherId) {
         String sql = "DELETE FROM vouchers WHERE id = ?";
 
@@ -76,10 +65,10 @@ public class VouchersHandler {
 
             pstmt.setInt(1, voucherId);
             return pstmt.executeUpdate() > 0;
+          
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-    // PUTRA
 }
