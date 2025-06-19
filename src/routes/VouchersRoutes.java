@@ -1,5 +1,6 @@
 package routes;
 
+import handlers.VillasHandler;
 import handlers.VouchersHandler;
 import models.*;
 
@@ -57,7 +58,16 @@ public class VouchersRoutes implements HttpHandler {
             sendResponse(exchange, response);
             return;
         } else if (method.equals("DELETE") && path.matches("/vouchers/\\d+/?")) {
-            response.put("message", "Delete voucher");
+            int voucherId = Integer.parseInt(path.split("/")[2]);
+            boolean success = VillasHandler.deleteVillaById(voucherId);
+
+            if (success) {
+                response.put("message", "Voucher deleted successfully");
+            } else {
+                response.put("error", "Failed to delete voucher");
+            }
+            sendResponse(exchange, response);
+            return;
         }
 
         sendResponse(exchange, response);
