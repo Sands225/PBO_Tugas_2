@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -86,6 +87,14 @@ public class VillasRoutes implements HttpHandler {
                     RoomType room = mapper.readValue(is, RoomType.class);
                     room.setVilla(villaId);
 
+                    // Check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     boolean success = RoomTypesHandler.insertRoomType(room);
                     if (success) {
                         response.put("message", "Room type added to villa successfully");
@@ -101,18 +110,31 @@ public class VillasRoutes implements HttpHandler {
                 if (path.matches("/villas/\\d+/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
                     InputStream is = exchange.getRequestBody();
-                    Villa villa = mapper.readValue(is, Villa.class);
-                    villa.setId(villaId);  // Make sure Villa model has setId()
 
-                    boolean success = VillasHandler.updateVilla(villa);
-                    if (success) {
-                        response.put("message", "Villa updated successfully");
-                    } else {
-                        response.put("error", "Failed to update villa");
+                    try {
+                        Villa villa = mapper.readValue(is, Villa.class);
+                        Villa existingVilla = VillasHandler.getVillaById(villaId);
+                        if (existingVilla == null) {
+                            response.put("error", "Villa with id " + villaId + " not found");
+                            sendResponse(exchange, response, 404);
+                            return;
+                        }
+                        villa.setId(villaId);
+
+                        boolean success = VillasHandler.updateVilla(villa);
+                        if (success) {
+                            response.put("message", "Villa updated successfully");
+                            sendResponse(exchange, response, 200);
+                        } else {
+                            response.put("error", "Failed to update villa");
+                            sendResponse(exchange, response, 500);
+                        }
+                    } catch (IOException e) {
+                        response.put("error", "Invalid input: " + e.getMessage());
+                        sendResponse(exchange, response, 400);
                     }
-                    sendResponse(exchange, response);
+//                    sendResponse(exchange, response, 200);
                     return;
-
                 } else if (path.matches("/villas/\\d+/rooms/\\d+/?")) {
                     String[] parts = path.split("/");
                     int villaId = Integer.parseInt(parts[2]);
@@ -181,6 +203,18 @@ public class VillasRoutes implements HttpHandler {
             }
         }
         return queryParams;
+    }
+
+    public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap, int responseCode) throws IOException {
+        String responseJson = new ObjectMapper().writeValueAsString(responseMap);
+        byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
+
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(responseCode, responseBytes.length);
+
+        OutputStream os = exchange.getResponseBody();
+        os.write(responseBytes);
+        os.close();
     }
 
     public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap) throws IOException {
