@@ -1,6 +1,6 @@
 package models;
 
-public class RoomType {
+public class Room {
     private int id;
     private int villa;
     private String name;
