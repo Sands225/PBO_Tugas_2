@@ -10,7 +10,6 @@ import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,7 +44,7 @@ public class VillasRoutes implements HttpHandler {
 
                 } else if (path.matches("/villas/\\d+/rooms/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
-                    List<RoomType> rooms = RoomTypesHandler.getRoomsByVillaId(villaId);
+                    List<Room> rooms = RoomsHandler.getRoomsByVillaId(villaId);
                     response.put("rooms", rooms);
 
                 } else if (path.matches("/villas/\\d+/bookings/?")) {
@@ -84,10 +83,10 @@ public class VillasRoutes implements HttpHandler {
                 } else if (path.matches("/villas/\\d+/rooms/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
                     InputStream is = exchange.getRequestBody();
-                    RoomType room = mapper.readValue(is, RoomType.class);
+                    Room room = mapper.readValue(is, Room.class);
                     room.setVilla(villaId);
 
-                    // Check if villa exist
+                    // check if villa exist
                     Villa villa = VillasHandler.getVillaById(villaId);
                     if (villa == null) {
                         response.put("error", "Villa with id " + villaId + " not found");
@@ -95,7 +94,7 @@ public class VillasRoutes implements HttpHandler {
                         return;
                     }
 
-                    boolean success = RoomTypesHandler.insertRoomType(room);
+                    boolean success = RoomsHandler.insertRoomType(room);
                     if (success) {
                         response.put("message", "Room type added to villa successfully");
                     } else {
@@ -112,13 +111,15 @@ public class VillasRoutes implements HttpHandler {
                     InputStream is = exchange.getRequestBody();
 
                     try {
-                        Villa villa = mapper.readValue(is, Villa.class);
+                        // check if villa exist
                         Villa existingVilla = VillasHandler.getVillaById(villaId);
                         if (existingVilla == null) {
                             response.put("error", "Villa with id " + villaId + " not found");
                             sendResponse(exchange, response, 404);
                             return;
                         }
+
+                        Villa villa = mapper.readValue(is, Villa.class);
                         villa.setId(villaId);
 
                         boolean success = VillasHandler.updateVilla(villa);
@@ -133,19 +134,34 @@ public class VillasRoutes implements HttpHandler {
                         response.put("error", "Invalid input: " + e.getMessage());
                         sendResponse(exchange, response, 400);
                     }
-//                    sendResponse(exchange, response, 200);
                     return;
                 } else if (path.matches("/villas/\\d+/rooms/\\d+/?")) {
                     String[] parts = path.split("/");
                     int villaId = Integer.parseInt(parts[2]);
                     int roomId = Integer.parseInt(parts[4]);
-
                     InputStream is = exchange.getRequestBody();
-                    RoomType room = mapper.readValue(is, RoomType.class);
+
+                    // check if villa exist
+                    Villa existingVilla = VillasHandler.getVillaById(villaId);
+                    if (existingVilla == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    // check if room exist
+                    Room existingRoom = RoomsHandler.getRoomByVillaAndRoomId(villaId, roomId);
+                    if (existingRoom == null) {
+                        response.put("error", "Room with id " + roomId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    Room room = mapper.readValue(is, Room.class);
                     room.setId(roomId);
                     room.setVilla(villaId);
 
-                    boolean success = RoomTypesHandler.updateRoomType(room);
+                    boolean success = RoomsHandler.updateRoomType(room);
                     if (success) {
                         response.put("message", "Room type updated successfully");
                     } else {
@@ -159,8 +175,16 @@ public class VillasRoutes implements HttpHandler {
             case "DELETE":
                 if (path.matches("/villas/\\d+/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
-                    boolean success = VillasHandler.deleteVillaById(villaId);
 
+                    // check if villa exist
+                    Villa existingVilla = VillasHandler.getVillaById(villaId);
+                    if (existingVilla == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    boolean success = VillasHandler.deleteVillaById(villaId);
                     if (success) {
                         response.put("message", "Villa deleted successfully");
                     } else {
@@ -174,7 +198,23 @@ public class VillasRoutes implements HttpHandler {
                     int villaId = Integer.parseInt(parts[2]);
                     int roomId = Integer.parseInt(parts[4]);
 
-                    boolean success = RoomTypesHandler.deleteRoomTypeById(roomId, villaId);
+                    // check if villa exist
+                    Villa existingVilla = VillasHandler.getVillaById(villaId);
+                    if (existingVilla == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    // check if room exist
+                    List<Room> existingRoom = RoomsHandler.getRoomsByVillaId(villaId);
+                    if (existingRoom == null) {
+                        response.put("error", "Room with id " + roomId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    boolean success = RoomsHandler.deleteRoomTypeById(roomId, villaId);
 
                     if (success) {
                         response.put("message", "Room deleted successfully");
