@@ -2,6 +2,7 @@ package handlers;
 
 import models.*;
 import db.Database;
+import validations.CustomerValidation;
 
 import java.sql.*;
 import java.util.*;
@@ -58,8 +59,8 @@ public static boolean addCustomer(Customer customer) {
     try (Connection conn = Database.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        if (customer.getName() == null || customer.getEmail() == null || customer.getPhone() == null) {
-            throw new IllegalArgumentException("Name, email, and phone cannot be null.");
+        if (!CustomerValidation.isCustomerValid(customer)) {
+            throw new IllegalArgumentException("Customer data is invalid (name, email, or phone incorrect).");
         }
 
         pstmt.setString(1, customer.getName());
