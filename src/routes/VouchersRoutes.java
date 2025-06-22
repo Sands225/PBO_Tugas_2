@@ -69,6 +69,14 @@ public class VouchersRoutes implements HttpHandler {
                     Voucher voucher = mapper.readValue(is, Voucher.class);
                     voucher.setId(voucherId);
 
+                    // check if voucher exist
+                    Voucher existingVoucher = VouchersHandler.getVoucherById(voucherId);
+                    if (existingVoucher == null) {
+                        response.put("error", "Voucher not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     boolean success = VouchersHandler.updateVoucher(voucher);
                     if (!success) {
                         response.put("error", "Failed to update voucher");
@@ -85,6 +93,14 @@ public class VouchersRoutes implements HttpHandler {
                 if (path.matches("/vouchers/\\d+/?")) {
                     int voucherId = Integer.parseInt(path.split("/")[2]);
                     boolean success = VouchersHandler.deleteVoucherById(voucherId);
+
+                    // check if voucher exist
+                    Voucher existingVoucher = VouchersHandler.getVoucherById(voucherId);
+                    if (existingVoucher == null) {
+                        response.put("error", "Voucher not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
 
                     if (!success) {
                         response.put("error", "Failed to delete voucher");
