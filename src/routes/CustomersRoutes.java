@@ -29,23 +29,41 @@ public class CustomersRoutes implements HttpHandler {
 
             } else if (path.matches("/customers/\\d+/?")) {
                 int id = Integer.parseInt(path.replaceAll("\\D+", ""));
+
+                // check if customer exist
                 Customer customer = CustomersHandler.getCustomerById(id);
-                if (customer != null) {
-                    sendJsonResponse(exchange, customer);
-                } else {
+                if (customer == null) {
                     response.put("error", "Customer not found");
-                    exchange.sendResponseHeaders(404, 0);
-                    exchange.getResponseBody().close();
+                    sendResponse(exchange, response, 404);
+                    return;
                 }
+
+                sendJsonResponse(exchange, customer);
                 return;
 
             } else if (path.matches("/customers/\\d+/bookings/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
+
+                // check if customer exist
+                Customer customer = CustomersHandler.getCustomerById(customerId);
+                if (customer == null) {
+                    response.put("error", "Customer not found");
+                    sendResponse(exchange, response, 404);
+                }
+
                 List<Map<String, Object>> bookings = BookingsHandler.getBookingsByCustomerId(customerId);
                 response.put("bookings", bookings);
 
             } else if (path.matches("/customers/\\d+/reviews/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
+
+                // check if customer exist
+                Customer customer = CustomersHandler.getCustomerById(customerId);
+                if (customer == null) {
+                    response.put("error", "Customer not found");
+                    sendResponse(exchange, response, 404);
+                }
+
                 List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
                 response.put("reviews", reviews);
             }
@@ -55,14 +73,16 @@ public class CustomersRoutes implements HttpHandler {
                 Customer customer = mapper.readValue(is, Customer.class);
 
                 boolean success = CustomersHandler.addCustomer(customer);
-                if (success) {
-                    response.put("message", "Customer registered successfully.");
-                } else {
-                    exchange.sendResponseHeaders(400, 0);
-                    response.put("error", "Failed to register customer. Data might be invalid.");
+                if (!success) {
+                    response.put("error", "Failed to register customer");
+                    sendResponse(exchange, response, 400);
+                    return;
                 }
-                sendResponse(exchange, response);
+
+                response.put("message", "Customer registered successfully.");
+                sendResponse(exchange, response, 200);
                 return;
+
             } else if (path.matches("/customers/\\d+/bookings/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
 
@@ -71,13 +91,14 @@ public class CustomersRoutes implements HttpHandler {
                 booking.setCustomer(customerId);
 
                 boolean success = BookingsHandler.insertBooking(booking);
-                if (success) {
-                    response.put("message", "Booking successfully created.");
-                } else {
-                    exchange.sendResponseHeaders(400, 0);
-                    response.put("error", "Failed to create booking. Check data validity.");
+                if (!success) {
+                    response.put("error", "Failed to create booking");
+                    sendResponse(exchange, response, 400);
+                    return;
                 }
-                sendResponse(exchange, response);
+
+                response.put("message", "Booking has been successfully added");
+                sendResponse(exchange, response, 200);
                 return;
             } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
@@ -87,41 +108,61 @@ public class CustomersRoutes implements HttpHandler {
                 Review review = mapper.readValue(is, Review.class);
                 review.setBooking(bookingId);
 
-                boolean success = ReviewsHandler.insertBookingReview(review);
-                if (success) {
-                    response.put("message", "Review has been successfully added");
-                } else {
-                    response.put("error", "Failed to add review");
+                // check if customer exist
+                Customer customer = CustomersHandler.getCustomerById(customerId);
+                if (customer == null) {
+                    response.put("error", "Customer not found");
+                    sendResponse(exchange, response, 404);
                 }
-                sendResponse(exchange, response);
+
+                // check if booking exist
+                Booking booking = BookingsHandler.getBookingByCustomerAndBookingId(customerId, bookingId);
+                if (booking == null) {
+                    response.put("error", "Booking not found");
+                    sendResponse(exchange, response, 404);
+                }
+
+                boolean success = ReviewsHandler.insertBookingReview(review);
+                if (!success) {
+                    response.put("error", "Failed to add review");
+                    sendResponse(exchange, response, 400);
+                    return;
+                }
+
+                response.put("message", "Review has been successfully added");
+                sendResponse(exchange, response, 200);
                 return;
             }
         } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
             int customerId = Integer.parseInt(path.split("/")[2]);
             InputStream is = exchange.getRequestBody();
+
             Customer customer = mapper.readValue(is, Customer.class);
             customer.setId(customerId);
 
             boolean success = CustomersHandler.updateCustomer(customer);
-            if (success) {
-                response.put("message", "Villa updated successfully");
-            } else {
+            if (!success) {
                 response.put("error", "Failed to update villa");
+                sendResponse(exchange, response, 400);
             }
-            sendResponse(exchange, response);
+
+            response.put("message", "Villa updated successfully");
+            sendResponse(exchange, response, 200);
             return;
         }
 
-        sendResponse(exchange, response);
+        sendResponse(exchange, response, 200);
     }
 
-    private void sendResponse(HttpExchange exchange, Map<String, Object> data) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
+    public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap, int responseCode) throws IOException {
+        String responseJson = new ObjectMapper().writeValueAsString(responseMap);
+        byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
+
         exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
+        exchange.sendResponseHeaders(responseCode, responseBytes.length);
+
         OutputStream os = exchange.getResponseBody();
-        os.write(json.getBytes());
+        os.write(responseBytes);
         os.close();
     }
 
