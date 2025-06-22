@@ -37,23 +37,50 @@ public class VillasRoutes implements HttpHandler {
                         sendJsonResponse(exchange, villa);
                     } else {
                         response.put("error", "Villa not found");
-                        exchange.sendResponseHeaders(404, 0);
-                        exchange.getResponseBody().close();
+                        sendResponse(exchange, response, 404);
+                        return;
                     }
                     return;
 
                 } else if (path.matches("/villas/\\d+/rooms/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
-                    List<RoomType> rooms = RoomTypesHandler.getRoomsByVillaId(villaId);
+
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    List<Room> rooms = RoomsHandler.getRoomsByVillaId(villaId);
                     response.put("rooms", rooms);
 
                 } else if (path.matches("/villas/\\d+/bookings/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
+
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     List<Map<String, Object>> bookings = BookingsHandler.getBookingsByVillaId(villaId);
                     response.put("bookings", bookings);
 
                 } else if (path.matches("/villas/\\d+/reviews/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
+
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByVillaId(villaId);
                     response.put("reviews", reviews);
 
@@ -62,7 +89,17 @@ public class VillasRoutes implements HttpHandler {
                     String checkout = queryParams.get("co_date");
 
                     List<Map<String, Object>> availableVillas = VillasHandler.getAvailableVillas(checkin, checkout);
+                    if (availableVillas == null) {
+                        response.put("error", "No available villas found at " + checkin + " and " + checkout);
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     response.put("available_villas", availableVillas);
+                } else {
+                    response.put("error", "Path " + path + " not found.");
+                    sendResponse(exchange, response, 404);
+                    return;
                 }
                 break;
 
@@ -83,10 +120,18 @@ public class VillasRoutes implements HttpHandler {
                 } else if (path.matches("/villas/\\d+/rooms/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
                     InputStream is = exchange.getRequestBody();
-                    RoomType room = mapper.readValue(is, RoomType.class);
+                    Room room = mapper.readValue(is, Room.class);
                     room.setVilla(villaId);
 
-                    boolean success = RoomTypesHandler.insertRoomType(room);
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    boolean success = RoomsHandler.insertRoomType(room);
                     if (success) {
                         response.put("message", "Room type added to villa successfully");
                     } else {
@@ -101,35 +146,66 @@ public class VillasRoutes implements HttpHandler {
                 if (path.matches("/villas/\\d+/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
                     InputStream is = exchange.getRequestBody();
-                    Villa villa = mapper.readValue(is, Villa.class);
-                    villa.setId(villaId);  // Make sure Villa model has setId()
 
-                    boolean success = VillasHandler.updateVilla(villa);
-                    if (success) {
-                        response.put("message", "Villa updated successfully");
-                    } else {
-                        response.put("error", "Failed to update villa");
+                    try {
+                        // check if villa exist
+                        Villa existingVilla = VillasHandler.getVillaById(villaId);
+                        if (existingVilla == null) {
+                            response.put("error", "Villa with id " + villaId + " not found");
+                            sendResponse(exchange, response, 404);
+                            return;
+                        }
+
+                        Villa villa = mapper.readValue(is, Villa.class);
+                        villa.setId(villaId);
+
+                        boolean success = VillasHandler.updateVilla(villa);
+                        if (success) {
+                            response.put("message", "Villa updated successfully");
+                            sendResponse(exchange, response, 200);
+                        } else {
+                            response.put("error", "Failed to update villa");
+                            sendResponse(exchange, response, 500);
+                        }
+                    } catch (IOException e) {
+                        response.put("error", "Invalid input: " + e.getMessage());
+                        sendResponse(exchange, response, 400);
                     }
-                    sendResponse(exchange, response);
                     return;
-
                 } else if (path.matches("/villas/\\d+/rooms/\\d+/?")) {
                     String[] parts = path.split("/");
                     int villaId = Integer.parseInt(parts[2]);
                     int roomId = Integer.parseInt(parts[4]);
-
                     InputStream is = exchange.getRequestBody();
-                    RoomType room = mapper.readValue(is, RoomType.class);
+
+                    // check if villa exist
+                    Villa existingVilla = VillasHandler.getVillaById(villaId);
+                    if (existingVilla == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    // check if room exist
+                    Room existingRoom = RoomsHandler.getRoomByVillaAndRoomId(villaId, roomId);
+                    if (existingRoom == null) {
+                        response.put("error", "Room with id " + roomId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    Room room = mapper.readValue(is, Room.class);
                     room.setId(roomId);
                     room.setVilla(villaId);
 
-                    boolean success = RoomTypesHandler.updateRoomType(room);
+                    boolean success = RoomsHandler.updateRoomType(room);
                     if (success) {
-                        response.put("message", "Room type updated successfully");
+                        response.put("message", "Room updated successfully");
+                        sendResponse(exchange, response, 200);
                     } else {
-                        response.put("error", "Failed to update room type");
+                        response.put("error", "Failed to update room");
+                        sendResponse(exchange, response, 500);
                     }
-                    sendResponse(exchange, response);
                     return;
                 }
                 break;
@@ -137,14 +213,23 @@ public class VillasRoutes implements HttpHandler {
             case "DELETE":
                 if (path.matches("/villas/\\d+/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
-                    boolean success = VillasHandler.deleteVillaById(villaId);
 
+                    // check if villa exist
+                    Villa existingVilla = VillasHandler.getVillaById(villaId);
+                    if (existingVilla == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    boolean success = VillasHandler.deleteVillaById(villaId);
                     if (success) {
                         response.put("message", "Villa deleted successfully");
+                        sendResponse(exchange, response, 200);
                     } else {
                         response.put("error", "Failed to delete villa");
+                        sendResponse(exchange, response, 500);
                     }
-                    sendResponse(exchange, response);
                     return;
 
                 } else if (path.matches("/villas/\\d+/rooms/\\d+/?")) {
@@ -152,19 +237,34 @@ public class VillasRoutes implements HttpHandler {
                     int villaId = Integer.parseInt(parts[2]);
                     int roomId = Integer.parseInt(parts[4]);
 
-                    boolean success = RoomTypesHandler.deleteRoomTypeById(roomId, villaId);
-
-                    if (success) {
-                        response.put("message", "Room deleted successfully");
-                    } else {
-                        response.put("error", "Failed to delete room");
+                    // check if villa exist
+                    Villa existingVilla = VillasHandler.getVillaById(villaId);
+                    if (existingVilla == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
                     }
-                    sendResponse(exchange, response);
+
+                    // check if room exist
+                    Room existingRoom = RoomsHandler.getRoomByVillaAndRoomId(villaId, roomId);
+                    if (existingRoom == null) {
+                        response.put("error", "Room with id " + roomId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    boolean success = RoomsHandler.deleteRoomTypeById(roomId, villaId);
+                    if (success) {
+                        response.put("message", "Villa deleted successfully");
+                        sendResponse(exchange, response, 200);
+                    } else {
+                        response.put("error", "Failed to delete villa");
+                        sendResponse(exchange, response, 500);
+                    }
                     return;
                 }
                 break;
         }
-
         sendResponse(exchange, response);
     }
 
@@ -183,6 +283,18 @@ public class VillasRoutes implements HttpHandler {
         return queryParams;
     }
 
+    public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap, int responseCode) throws IOException {
+        String responseJson = new ObjectMapper().writeValueAsString(responseMap);
+        byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
+
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(responseCode, responseBytes.length);
+
+        OutputStream os = exchange.getResponseBody();
+        os.write(responseBytes);
+        os.close();
+    }
+
     public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap) throws IOException {
         String responseJson = new ObjectMapper().writeValueAsString(responseMap);
         byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
@@ -198,8 +310,10 @@ public class VillasRoutes implements HttpHandler {
     private void sendJsonResponse(HttpExchange exchange, Object data) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(data);
+
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, json.getBytes().length);
+
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(json.getBytes());
         }

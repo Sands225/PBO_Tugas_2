@@ -21,107 +21,166 @@ public class CustomersRoutes implements HttpHandler {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> response = new HashMap<>();
 
-        if (method.equals("GET")) {
-            if (path.matches("/customers/?")) {
-                List<Customer> customer = CustomersHandler.getAllCustomers();
-                sendJsonResponse(exchange, customer);
-                return;
-
-            } else if (path.matches("/customers/\\d+/?")) {
-                int id = Integer.parseInt(path.replaceAll("\\D+", ""));
-                Customer customer = CustomersHandler.getCustomerById(id);
-                if (customer != null) {
+        switch (method) {
+            case "GET":
+                if (path.matches("/customers/?")) {
+                    List<Customer> customer = CustomersHandler.getAllCustomers();
                     sendJsonResponse(exchange, customer);
-                } else {
-                    response.put("error", "Customer not found");
-                    exchange.sendResponseHeaders(404, 0);
-                    exchange.getResponseBody().close();
+                    return;
+
+                } else if (path.matches("/customers/\\d+/?")) {
+                    int id = Integer.parseInt(path.replaceAll("\\D+", ""));
+                    Customer customer = CustomersHandler.getCustomerById(id);
+                    if (customer == null) {
+                        response.put("error", "Customer not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+                    sendJsonResponse(exchange, customer);
+                    return;
+
+                } else if (path.matches("/customers/\\d+/bookings/?")) {
+                    int customerId = Integer.parseInt(path.split("/")[2]);
+                    Customer customer = CustomersHandler.getCustomerById(customerId);
+                    if (customer == null) {
+                        response.put("error", "Customer not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+                    List<Map<String, Object>> bookings = BookingsHandler.getBookingsByCustomerId(customerId);
+                    response.put("bookings", bookings);
+                    sendResponse(exchange, response, 200);
+                    return;
+
+                } else if (path.matches("/customers/\\d+/reviews/?")) {
+                    int customerId = Integer.parseInt(path.split("/")[2]);
+                    Customer customer = CustomersHandler.getCustomerById(customerId);
+                    if (customer == null) {
+                        response.put("error", "Customer not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+                    List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
+                    response.put("reviews", reviews);
+                    sendResponse(exchange, response, 200);
+                    return;
                 }
-                return;
+                break;
 
-            } else if (path.matches("/customers/\\d+/bookings/?")) {
-                int customerId = Integer.parseInt(path.split("/")[2]);
-                List<Map<String, Object>> bookings = BookingsHandler.getBookingsByCustomerId(customerId);
-                response.put("bookings", bookings);
-
-            } else if (path.matches("/customers/\\d+/reviews/?")) {
-                int customerId = Integer.parseInt(path.split("/")[2]);
-                List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
-                response.put("reviews", reviews);
-            }
-        } else if (method.equals("POST")) {
-            if (path.matches("/customers/?")) {
-                InputStream is = exchange.getRequestBody();
-                Customer customer = mapper.readValue(is, Customer.class);
-
-                boolean success = CustomersHandler.addCustomer(customer);
-                if (success) {
+            case "POST":
+                if (path.matches("/customers/?")) {
+                    InputStream is = exchange.getRequestBody();
+                    Customer customer = mapper.readValue(is, Customer.class);
+                    boolean success = CustomersHandler.addCustomer(customer);
+                    if (!success) {
+                        response.put("error", "Failed to register customer");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
                     response.put("message", "Customer registered successfully.");
-                } else {
-                    exchange.sendResponseHeaders(400, 0);
-                    response.put("error", "Failed to register customer. Data might be invalid.");
-                }
-                sendResponse(exchange, response);
-                return;
-            } else if (path.matches("/customers/\\d+/bookings/?")) {
-                int customerId = Integer.parseInt(path.split("/")[2]);
+                    sendResponse(exchange, response, 200);
+                    return;
 
-                InputStream is = exchange.getRequestBody();
-                Booking booking = mapper.readValue(is, Booking.class);
-                booking.setCustomer(customerId);
+                } else if (path.matches("/customers/\\d+/bookings/?")) {
+                    int customerId = Integer.parseInt(path.split("/")[2]);
+                    InputStream is = exchange.getRequestBody();
+                    Booking booking = mapper.readValue(is, Booking.class);
+                    booking.setCustomer(customerId);
 
-                boolean success = BookingsHandler.insertBooking(booking);
-                if (success) {
-                    response.put("message", "Booking successfully created.");
-                } else {
-                    exchange.sendResponseHeaders(400, 0);
-                    response.put("error", "Failed to create booking. Check data validity.");
-                }
-                sendResponse(exchange, response);
-                return;
-            } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
-                int customerId = Integer.parseInt(path.split("/")[2]);
-                int bookingId = Integer.parseInt(path.split("/")[4]);
+                    Customer customer = CustomersHandler.getCustomerById(customerId);
+                    if (customer == null) {
+                        response.put("error", "Customer not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
 
-                InputStream is = exchange.getRequestBody();
-                Review review = mapper.readValue(is, Review.class);
-                review.setBooking(bookingId);
+                    boolean success = BookingsHandler.insertBooking(booking);
+                    if (!success) {
+                        response.put("error", "Failed to create booking");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
 
-                boolean success = ReviewsHandler.insertBookingReview(review);
-                if (success) {
+                    response.put("message", "Booking has been successfully added");
+                    sendResponse(exchange, response, 200);
+                    return;
+
+                } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
+                    int customerId = Integer.parseInt(path.split("/")[2]);
+                    int bookingId = Integer.parseInt(path.split("/")[4]);
+                    InputStream is = exchange.getRequestBody();
+                    Review review = mapper.readValue(is, Review.class);
+                    review.setBooking(bookingId);
+
+                    Customer customer = CustomersHandler.getCustomerById(customerId);
+                    if (customer == null) {
+                        response.put("error", "Customer not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    Booking booking = BookingsHandler.getBookingByCustomerAndBookingId(customerId, bookingId);
+                    if (booking == null) {
+                        response.put("error", "Booking not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    boolean success = ReviewsHandler.insertBookingReview(review);
+                    if (!success) {
+                        response.put("error", "Failed to add review");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
+
                     response.put("message", "Review has been successfully added");
-                } else {
-                    response.put("error", "Failed to add review");
+                    sendResponse(exchange, response, 200);
+                    return;
                 }
-                sendResponse(exchange, response);
-                return;
-            }
-        } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
-            int customerId = Integer.parseInt(path.split("/")[2]);
-            InputStream is = exchange.getRequestBody();
-            Customer customer = mapper.readValue(is, Customer.class);
-            customer.setId(customerId);
+                break;
 
-            boolean success = CustomersHandler.updateCustomer(customer);
-            if (success) {
-                response.put("message", "Villa updated successfully");
-            } else {
-                response.put("error", "Failed to update villa");
-            }
-            sendResponse(exchange, response);
-            return;
+            case "PUT":
+                if (path.matches("/customers/\\d+/?")) {
+                    int customerId = Integer.parseInt(path.split("/")[2]);
+                    InputStream is = exchange.getRequestBody();
+
+                    Customer existingCustomer = CustomersHandler.getCustomerById(customerId);
+                    if (existingCustomer == null) {
+                        response.put("error", "Customer not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    Customer customer = mapper.readValue(is, Customer.class);
+                    customer.setId(customerId);
+
+                    boolean success = CustomersHandler.updateCustomer(customer);
+                    if (!success) {
+                        response.put("error", "Failed to update customer");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
+
+                    response.put("message", "Customer updated successfully");
+                    sendResponse(exchange, response, 200);
+                    return;
+                }
+                break;
         }
 
-        sendResponse(exchange, response);
+        response.put("error", "Method or route not supported");
+        sendResponse(exchange, response, 404);
     }
 
-    private void sendResponse(HttpExchange exchange, Map<String, Object> data) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
+    public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap, int responseCode) throws IOException {
+        String responseJson = new ObjectMapper().writeValueAsString(responseMap);
+        byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
+
         exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
+        exchange.sendResponseHeaders(responseCode, responseBytes.length);
+
         OutputStream os = exchange.getResponseBody();
-        os.write(json.getBytes());
+        os.write(responseBytes);
         os.close();
     }
 

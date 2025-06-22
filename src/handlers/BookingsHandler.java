@@ -80,6 +80,34 @@ public class BookingsHandler {
         return bookings;
     }
 
+    public static Booking getBookingByCustomerAndBookingId(int customerId, int bookingId) {
+        String sql = "SELECT * FROM bookings WHERE id = ? AND customer = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, bookingId);
+            stmt.setInt(2, customerId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Booking(
+                        rs.getInt("id"),
+                        rs.getInt("customer"),
+                        rs.getInt("room_type"),
+                        rs.getString("checkin_date"),
+                        rs.getString("checkout_date"),
+                        rs.getInt("price"),
+                        (Integer) rs.getObject("voucher"), // handles nulls
+                        rs.getInt("final_price"),
+                        rs.getString("payment_status"),
+                        rs.getInt("has_checkedin"),
+                        rs.getInt("has_checkedout")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // POST
         public static boolean insertBooking (Booking booking){
             String sql = "INSERT INTO bookings (customer, room_type, checkin_date, checkout_date, price, voucher, final_price, payment_status, has_checkedin, has_checkedout) " +

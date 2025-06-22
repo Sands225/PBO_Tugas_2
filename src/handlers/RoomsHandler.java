@@ -6,10 +6,10 @@ import db.Database;
 import java.sql.*;
 import java.util.*;
 
-public class RoomTypesHandler {
+public class RoomsHandler {
     //  GET
-    public static List<RoomType> getRoomsByVillaId(int villaId) {
-        List<RoomType> rooms = new ArrayList<>();
+    public static List<Room> getRoomsByVillaId(int villaId) {
+        List<Room> rooms = new ArrayList<>();
         String sql = "SELECT * FROM room_types WHERE villa = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -17,7 +17,7 @@ public class RoomTypesHandler {
             pstmt.setInt(1, villaId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                RoomType room = new RoomType();
+                Room room = new Room();
                 room.setId(rs.getInt("id"));
                 room.setVilla(rs.getInt("villa"));
                 room.setName(rs.getString("name"));
@@ -40,8 +40,40 @@ public class RoomTypesHandler {
         return rooms;
     }
 
+    public static Room getRoomByVillaAndRoomId(int villaId, int roomId) {
+        String sql = "SELECT * FROM room_types WHERE id = ? AND villa = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, roomId);
+            stmt.setInt(2, villaId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Room(
+                    rs.getInt("id"),
+                    rs.getInt("villa"),
+                    rs.getString("name"),
+                    rs.getInt("quantity"),
+                    rs.getInt("capacity"),
+                    rs.getInt("price"),
+                    rs.getString("bed_size"),
+                    rs.getInt("has_desk"),
+                    rs.getInt("has_ac"),
+                    rs.getInt("has_tv"),
+                    rs.getInt("has_wifi"),
+                    rs.getInt("has_shower"),
+                    rs.getInt("has_hotwater"),
+                    rs.getInt("has_fridge")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // POST
-    public static boolean insertRoomType(RoomType room) {
+    public static boolean insertRoomType(Room room) {
         String sql = "INSERT INTO room_types (villa, name, quantity, capacity, price, bed_size, has_desk, has_ac, has_tv, has_wifi, has_shower, has_hotwater, has_fridge) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -69,7 +101,7 @@ public class RoomTypesHandler {
     }
 
     // PUT / UPDATE
-    public static boolean updateRoomType(RoomType room) {
+    public static boolean updateRoomType(Room room) {
         String sql = "UPDATE room_types SET name = ?, quantity = ?, capacity = ?, price = ?, bed_size = ?, has_desk = ?, has_ac = ?, has_tv = ?, has_wifi = ?, has_shower = ?, has_hotwater = ?, has_fridge = ? WHERE id = ? AND villa = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

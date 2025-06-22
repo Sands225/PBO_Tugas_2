@@ -1,6 +1,6 @@
 package models;
 
-public class RoomType {
+public class Room {
     private int id;
     private int villa;
     private String name;
@@ -15,6 +15,28 @@ public class RoomType {
     private int has_shower;
     private int has_hotwater;
     private int has_fridge;
+
+    public Room() {}
+
+    public Room(int id, int villa, String name, int quantity, int capacity, int price,
+                String bed_size, int has_desk, int has_ac, int has_tv, int has_wifi,
+                int has_shower, int has_hotwater, int has_fridge) {
+        this.id = id;
+        this.villa = villa;
+        this.name = name;
+        this.quantity = quantity;
+        this.capacity = capacity;
+        this.price = price;
+        this.bed_size = bed_size;
+        this.has_desk = has_desk;
+        this.has_ac = has_ac;
+        this.has_tv = has_tv;
+        this.has_wifi = has_wifi;
+        this.has_shower = has_shower;
+        this.has_hotwater = has_hotwater;
+        this.has_fridge = has_fridge;
+    }
+
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
