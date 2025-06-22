@@ -37,23 +37,50 @@ public class VillasRoutes implements HttpHandler {
                         sendJsonResponse(exchange, villa);
                     } else {
                         response.put("error", "Villa not found");
-                        exchange.sendResponseHeaders(404, 0);
-                        exchange.getResponseBody().close();
+                        sendResponse(exchange, response, 404);
+                        return;
                     }
                     return;
 
                 } else if (path.matches("/villas/\\d+/rooms/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
+
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     List<Room> rooms = RoomsHandler.getRoomsByVillaId(villaId);
                     response.put("rooms", rooms);
 
                 } else if (path.matches("/villas/\\d+/bookings/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
+
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     List<Map<String, Object>> bookings = BookingsHandler.getBookingsByVillaId(villaId);
                     response.put("bookings", bookings);
 
                 } else if (path.matches("/villas/\\d+/reviews/?")) {
                     int villaId = Integer.parseInt(path.split("/")[2]);
+
+                    // check if villa exist
+                    Villa villa = VillasHandler.getVillaById(villaId);
+                    if (villa == null) {
+                        response.put("error", "Villa with id " + villaId + " not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByVillaId(villaId);
                     response.put("reviews", reviews);
 
@@ -62,7 +89,17 @@ public class VillasRoutes implements HttpHandler {
                     String checkout = queryParams.get("co_date");
 
                     List<Map<String, Object>> availableVillas = VillasHandler.getAvailableVillas(checkin, checkout);
+                    if (availableVillas == null) {
+                        response.put("error", "No available villas found at " + checkin + " and " + checkout);
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
                     response.put("available_villas", availableVillas);
+                } else {
+                    response.put("error", "Path " + path + " not found.");
+                    sendResponse(exchange, response, 404);
+                    return;
                 }
                 break;
 
@@ -272,8 +309,10 @@ public class VillasRoutes implements HttpHandler {
     private void sendJsonResponse(HttpExchange exchange, Object data) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(data);
+
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, json.getBytes().length);
+
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(json.getBytes());
         }
