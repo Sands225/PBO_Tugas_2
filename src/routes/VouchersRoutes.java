@@ -1,19 +1,18 @@
 package routes;
 
-import handlers.VillasHandler;
 import handlers.VouchersHandler;
-import models.*;
+import models.Voucher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.io.OutputStream;
+import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import java.io.IOException;
 
 public class VouchersRoutes implements HttpHandler {
     @Override
@@ -23,66 +22,97 @@ public class VouchersRoutes implements HttpHandler {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> response = new HashMap<>();
 
-        if (method.equals("GET")) {
-            if (path.matches("/vouchers/?")) {
-                List<Voucher> vouchers = VouchersHandler.getAllVouchers();
-                sendJsonResponse(exchange, vouchers);
-                return;
-            } else if (path.matches("/vouchers/\\d+/?")) {
-                InputStream is = exchange.getRequestBody();
-                Voucher voucher = mapper.readValue(is, Voucher.class);
+        switch (method) {
+            case "GET":
+                if (path.matches("/vouchers/?")) {
+                    List<Voucher> vouchers = VouchersHandler.getAllVouchers();
+                    sendJsonResponse(exchange, vouchers);
+                    return;
 
-                boolean success = VouchersHandler.insertVoucher(voucher);
-                if (success) {
-                    response.put("message", "Voucher created successfully");
-                } else {
-                    response.put("error", "Failed to create voucher");
+                } else if (path.matches("/vouchers/\\d+/?")) {
+                    int id = Integer.parseInt(path.replaceAll("\\D+", ""));
+                    Voucher voucher = VouchersHandler.getVoucherById(id);
+
+                    if (voucher == null) {
+                        response.put("error", "Voucher not found");
+                        sendResponse(exchange, response, 404);
+                        return;
+                    }
+
+                    sendJsonResponse(exchange, voucher);
+                    return;
                 }
-                sendResponse(exchange, response);
-                return;
-            }
-        } else if (method.equals("POST") && path.matches("/vouchers/?")) {
-            response.put("message", "Create voucher");
-        } else if (method.equals("PUT") && path.matches("/vouchers/\\d+/?")) {
-            int voucherId = Integer.parseInt(path.split("/")[2]);
-            InputStream is = exchange.getRequestBody();
-            Voucher voucher = mapper.readValue(is, Voucher.class);
-            voucher.setId(voucherId);
+                break;
 
-            boolean success = VouchersHandler.updateVoucher(voucher);
-            if (success) {
-                response.put("message", "Voucher updated successfully");
-            } else {
-                response.put("error", "Failed to update voucher");
-            }
-            sendResponse(exchange, response);
-            return;
-        } else if (method.equals("DELETE") && path.matches("/vouchers/\\d+/?")) {
-            int voucherId = Integer.parseInt(path.split("/")[2]);
-            boolean success = VillasHandler.deleteVillaById(voucherId);
+            case "POST":
+                if (path.matches("/vouchers/?")) {
+                    InputStream is = exchange.getRequestBody();
+                    Voucher voucher = mapper.readValue(is, Voucher.class);
 
-            if (success) {
-                response.put("message", "Voucher deleted successfully");
-            } else {
-                response.put("error", "Failed to delete voucher");
-            }
-            sendResponse(exchange, response);
-            return;
+                    boolean success = VouchersHandler.insertVoucher(voucher);
+                    if (!success) {
+                        response.put("error", "Failed to create voucher");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
+
+                    response.put("message", "Voucher created successfully");
+                    sendResponse(exchange, response, 200);
+                    return;
+                }
+                break;
+
+            case "PUT":
+                if (path.matches("/vouchers/\\d+/?")) {
+                    int voucherId = Integer.parseInt(path.split("/")[2]);
+                    InputStream is = exchange.getRequestBody();
+                    Voucher voucher = mapper.readValue(is, Voucher.class);
+                    voucher.setId(voucherId);
+
+                    boolean success = VouchersHandler.updateVoucher(voucher);
+                    if (!success) {
+                        response.put("error", "Failed to update voucher");
+                        sendResponse(exchange, response, 400);
+                    }
+
+                    response.put("message", "Voucher updated successfully");
+                    sendResponse(exchange, response, 200);
+                    return;
+                }
+                break;
+
+            case "DELETE":
+                if (path.matches("/vouchers/\\d+/?")) {
+                    int voucherId = Integer.parseInt(path.split("/")[2]);
+                    boolean success = VouchersHandler.deleteVoucherById(voucherId);
+
+                    if (!success) {
+                        response.put("error", "Failed to delete voucher");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
+
+                    response.put("message", "Voucher deleted successfully");
+                    sendResponse(exchange, response, 200);
+                    return;
+                }
+                break;
         }
 
-        sendResponse(exchange, response);
+        response.put("error", "Unsupported route or method");
+        sendResponse(exchange, response, 404);
     }
 
-    public void sendResponse(HttpExchange exchange, Map<String, Object> data) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
+    public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap, int responseCode) throws IOException {
+        String responseJson = new ObjectMapper().writeValueAsString(responseMap);
+        byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
 
         exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
-        OutputStream os = exchange.getResponseBody();
+        exchange.sendResponseHeaders(responseCode, responseBytes.length);
 
-        os.write(json.getBytes());
-        os.close();
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseBytes);
+        }
     }
 
     private void sendJsonResponse(HttpExchange exchange, Object data) throws IOException {
