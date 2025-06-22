@@ -200,11 +200,12 @@ public class VillasRoutes implements HttpHandler {
 
                     boolean success = RoomsHandler.updateRoomType(room);
                     if (success) {
-                        response.put("message", "Room type updated successfully");
+                        response.put("message", "Room updated successfully");
+                        sendResponse(exchange, response, 200);
                     } else {
-                        response.put("error", "Failed to update room type");
+                        response.put("error", "Failed to update room");
+                        sendResponse(exchange, response, 500);
                     }
-                    sendResponse(exchange, response);
                     return;
                 }
                 break;
@@ -224,10 +225,11 @@ public class VillasRoutes implements HttpHandler {
                     boolean success = VillasHandler.deleteVillaById(villaId);
                     if (success) {
                         response.put("message", "Villa deleted successfully");
+                        sendResponse(exchange, response, 200);
                     } else {
                         response.put("error", "Failed to delete villa");
+                        sendResponse(exchange, response, 500);
                     }
-                    sendResponse(exchange, response);
                     return;
 
                 } else if (path.matches("/villas/\\d+/rooms/\\d+/?")) {
@@ -244,7 +246,7 @@ public class VillasRoutes implements HttpHandler {
                     }
 
                     // check if room exist
-                    List<Room> existingRoom = RoomsHandler.getRoomsByVillaId(villaId);
+                    Room existingRoom = RoomsHandler.getRoomByVillaAndRoomId(villaId, roomId);
                     if (existingRoom == null) {
                         response.put("error", "Room with id " + roomId + " not found");
                         sendResponse(exchange, response, 404);
@@ -252,18 +254,17 @@ public class VillasRoutes implements HttpHandler {
                     }
 
                     boolean success = RoomsHandler.deleteRoomTypeById(roomId, villaId);
-
                     if (success) {
-                        response.put("message", "Room deleted successfully");
+                        response.put("message", "Villa deleted successfully");
+                        sendResponse(exchange, response, 200);
                     } else {
-                        response.put("error", "Failed to delete room");
+                        response.put("error", "Failed to delete villa");
+                        sendResponse(exchange, response, 500);
                     }
-                    sendResponse(exchange, response);
                     return;
                 }
                 break;
         }
-
         sendResponse(exchange, response);
     }
 
