@@ -90,6 +90,13 @@ public class CustomersRoutes implements HttpHandler {
                 Booking booking = mapper.readValue(is, Booking.class);
                 booking.setCustomer(customerId);
 
+                // check if customer exist
+                Customer customer = CustomersHandler.getCustomerById(customerId);
+                if (customer == null) {
+                    response.put("error", "Customer not found");
+                    sendResponse(exchange, response, 404);
+                }
+
                 boolean success = BookingsHandler.insertBooking(booking);
                 if (!success) {
                     response.put("error", "Failed to create booking");
@@ -137,16 +144,23 @@ public class CustomersRoutes implements HttpHandler {
             int customerId = Integer.parseInt(path.split("/")[2]);
             InputStream is = exchange.getRequestBody();
 
+            // check if customer exist
+            Customer existingCustomer = CustomersHandler.getCustomerById(customerId);
+            if (existingCustomer == null) {
+                response.put("error", "Customer not found");
+                sendResponse(exchange, response, 404);
+            }
+
             Customer customer = mapper.readValue(is, Customer.class);
             customer.setId(customerId);
 
             boolean success = CustomersHandler.updateCustomer(customer);
             if (!success) {
-                response.put("error", "Failed to update villa");
+                response.put("error", "Failed to update customer");
                 sendResponse(exchange, response, 400);
             }
 
-            response.put("message", "Villa updated successfully");
+            response.put("message", "Customer updated successfully");
             sendResponse(exchange, response, 200);
             return;
         }
