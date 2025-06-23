@@ -12,6 +12,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import validations.CustomerValidation;
 
 public class CustomersRoutes implements HttpHandler {
     @Override
@@ -71,12 +72,21 @@ public class CustomersRoutes implements HttpHandler {
                 if (path.matches("/customers/?")) {
                     InputStream is = exchange.getRequestBody();
                     Customer customer = mapper.readValue(is, Customer.class);
+
+                    boolean isCustomerValid = CustomerValidation.isCustomerValid(customer);
+                    if (!isCustomerValid) {
+                        response.put("error", "Data customer is not valid!");
+                        sendResponse(exchange, response, 400);
+                        return;
+                    }
+
                     boolean success = CustomersHandler.addCustomer(customer);
                     if (!success) {
                         response.put("error", "Failed to register customer");
                         sendResponse(exchange, response, 400);
                         return;
                     }
+
                     response.put("message", "Customer registered successfully.");
                     sendResponse(exchange, response, 200);
                     return;
