@@ -59,10 +59,6 @@ public static boolean addCustomer(Customer customer) {
     try (Connection conn = Database.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        if (!CustomerValidation.isCustomerValid(customer)) {
-            throw new IllegalArgumentException("Customer data is invalid (name, email, or phone incorrect).");
-        }
-
         pstmt.setString(1, customer.getName());
         pstmt.setString(2, customer.getEmail());
         pstmt.setString(3, customer.getPhone());

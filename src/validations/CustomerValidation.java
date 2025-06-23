@@ -4,6 +4,10 @@ import models.Customer;
 import java.util.regex.Pattern;
 
 public class CustomerValidation {
+    // Precompiled regex patterns
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-' ]{0,49}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?\\d{10,15}$");
 
     public static boolean isCustomerValid(Customer customer) {
         return isNameValid(customer.getName()) &&
@@ -12,22 +16,17 @@ public class CustomerValidation {
     }
 
     public static boolean isNameValid(String name) {
-        return name != null && !name.trim().isEmpty();
+        if (name == null) return false;
+        return NAME_PATTERN.matcher(name.trim()).matches();
     }
 
     public static boolean isEmailValid(String email) {
         if (email == null) return false;
-
-        // Regex sederhana untuk validasi email
-        String emailRegex = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$";
-        return Pattern.matches(emailRegex, email);
+        return EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 
     public static boolean isPhoneValid(String phone) {
         if (phone == null) return false;
-
-        // Nomor telepon hanya angka dan minimal 10 digit
-        String phoneRegex = "\\d{10,}";
-        return Pattern.matches(phoneRegex, phone);
+        return PHONE_PATTERN.matcher(phone.trim()).matches();
     }
 }
