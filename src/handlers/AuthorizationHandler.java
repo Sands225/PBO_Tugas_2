@@ -2,6 +2,7 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import exceptions.UnauthorizedException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,14 +19,10 @@ public class AuthorizationHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String apiKey = exchange.getRequestHeaders().getFirst("X-API-KEY");
 
-        if (API_KEY.equals(apiKey)) {
-            next.handle(exchange);
-        } else {
-            String response = "Invalid API Key";
-            exchange.sendResponseHeaders(401, response.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+        if (!API_KEY.equals(apiKey)) {
+            throw new UnauthorizedException("Invalid API Key");
         }
+
+        next.handle(exchange);
     }
 }
