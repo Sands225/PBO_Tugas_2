@@ -1,7 +1,7 @@
 package exceptions;
 
-public class VillaNotFoundException extends RuntimeException {
-    public VillaNotFoundException(String message) {
+public class NotFoundException extends RuntimeException {
+    public NotFoundException(String message) {
         super(message);
     }
 }
