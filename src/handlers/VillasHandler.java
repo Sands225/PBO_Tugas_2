@@ -1,6 +1,7 @@
 package handlers;
 
 import models.*;
+import exceptions.*;
 import db.Database;
 
 import java.sql.*;
@@ -26,7 +27,7 @@ public class VillasHandler {
                 villas.add(villa);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving villas", e);
         }
 
         return villas;
@@ -35,9 +36,11 @@ public class VillasHandler {
     public static Villa getVillaById(int id) {
         String sql = "SELECT * FROM villas WHERE id = ?";
         try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+
             if (rs.next()) {
                 return new Villa(
                         rs.getInt("id"),
@@ -45,11 +48,12 @@ public class VillasHandler {
                         rs.getString("description"),
                         rs.getString("address")
                 );
+            } else {
+                throw new NotFoundException("Villa with ID " + id + " not found.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to fetch villa with ID " + id, e);
         }
-        return null;
     }
 
     public static List<Map<String, Object>> getAvailableVillas(String ciDate, String coDate) {
@@ -79,8 +83,13 @@ public class VillasHandler {
                 villas.add(villa);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to fetch available villas", e);
         }
+
+        if (villas.isEmpty()) {
+            throw new NotFoundException("No available villas found in the selected date range");
+        }
+
         return villas;
     }
 
@@ -97,8 +106,7 @@ public class VillasHandler {
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Error retrieving customers", e);
         }
     }
 
@@ -115,8 +123,7 @@ public class VillasHandler {
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Error retrieving customers", e);
         }
     }
 
@@ -129,8 +136,7 @@ public class VillasHandler {
             pstmt.setInt(1, villaId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Error retrieving customers", e);
         }
     }
 }
