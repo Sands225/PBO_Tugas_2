@@ -1,5 +1,6 @@
 package handlers;
 
+import exceptions.*;
 import models.*;
 import db.Database;
 
@@ -38,7 +39,11 @@ public class BookingsHandler {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to retrieve bookings with villa ID " + villaId, e);
+        }
+
+        if (bookings.isEmpty()) {
+            throw new NotFoundException("No bookings found for villa ID " + villaId);
         }
 
         return bookings;
@@ -74,7 +79,11 @@ public class BookingsHandler {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to retrieve bookings with customer ID " + customerId, e);
+        }
+
+        if (bookings.isEmpty()) {
+            throw new NotFoundException("No bookings found for customer ID " + customerId);
         }
 
         return bookings;
@@ -101,11 +110,12 @@ public class BookingsHandler {
                         rs.getInt("has_checkedin"),
                         rs.getInt("has_checkedout")
                 );
+            } else {
+                throw new NotFoundException("No bookings found for booking ID " + bookingId + " and customer ID " + customerId);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to retrieve bookings with booking ID " + bookingId + " and customer ID " + customerId, e);
         }
-        return null;
     }
 
     // POST
@@ -133,10 +143,10 @@ public class BookingsHandler {
                 pstmt.setInt(9, booking.getHas_checkedin());
                 pstmt.setInt(10, booking.getHas_checkedout());
 
-                return pstmt.executeUpdate() > 0;
+                int affectedRows = pstmt.executeUpdate();
+                return affectedRows > 0;
             } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
+                throw new DatabaseException("Failed to insert booking", e);
             }
         }
 }

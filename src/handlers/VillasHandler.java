@@ -30,6 +30,10 @@ public class VillasHandler {
             throw new DatabaseException("Error retrieving villas", e);
         }
 
+        if (villas.isEmpty()) {
+            throw new NotFoundException("No villa found.");
+        }
+
         return villas;
     }
 
@@ -106,11 +110,11 @@ public class VillasHandler {
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving customers", e);
+            throw new DatabaseException("Error inserting customers", e);
         }
     }
 
-    // PUT / UPDATE
+    // UPDATE
     public static boolean updateVilla(Villa villa) {
         String sql = "UPDATE villas SET name = ?, description = ?, address = ? WHERE id = ?";
         try (Connection conn = Database.getConnection();
@@ -121,9 +125,14 @@ public class VillasHandler {
             pstmt.setString(3, villa.getAddress());
             pstmt.setInt(4, villa.getId());
 
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new NotFoundException("Villa with ID " + villa.getId() + " not found.");
+            }
+
+            return true;
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving customers", e);
+            throw new DatabaseException("Error updating customers", e);
         }
     }
 
@@ -134,7 +143,13 @@ public class VillasHandler {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, villaId);
-            return pstmt.executeUpdate() > 0;
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new NotFoundException("Villa with ID " + villaId + " not found.");
+            }
+
+            return true;
         } catch (SQLException e) {
             throw new DatabaseException("Error retrieving customers", e);
         }
