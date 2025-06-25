@@ -61,9 +61,7 @@ public class CustomersRoutes implements HttpHandler {
                         InputStream is = exchange.getRequestBody();
                         Customer customer = mapper.readValue(is, Customer.class);
 
-                        if (!CustomerValidation.isCustomerValid(customer)) {
-                            throw new IllegalArgumentException("Data customer is not valid!");
-                        }
+                        CustomerValidation.isCustomerValid(customer);
 
                         boolean success = CustomersHandler.addCustomer(customer);
                         if (!success) {
@@ -99,9 +97,6 @@ public class CustomersRoutes implements HttpHandler {
 
                         CustomersHandler.getCustomerById(customerId);
                         Booking booking = BookingsHandler.getBookingByCustomerAndBookingId(customerId, bookingId);
-                        if (booking == null) {
-                            throw new NotFoundException("Booking not found");
-                        }
 
                         if (!ReviewsHandler.insertBookingReview(review)) {
                             throw new RuntimeException("Failed to add review");
@@ -134,14 +129,18 @@ public class CustomersRoutes implements HttpHandler {
 
             throw new NotFoundException("Method or route not supported: " + method + " " + path);
 
-        } catch (NotFoundException e) {
+        }  catch (NotFoundException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
         } catch (IllegalArgumentException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 400);
+        } catch (IOException e) {
+            SendResponseUtils.sendErrorResponse(exchange, "I/O error: " + e.getMessage(), 500);
+            e.printStackTrace();
         } catch (RuntimeException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 500);
         } catch (Exception e) {
             SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
+            e.printStackTrace();
         }
     }
 }
