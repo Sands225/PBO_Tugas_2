@@ -12,9 +12,53 @@ Mata Kuliah : Pemrograman Berbasis Obyek E
 - I Wayan Arya Wikananda    ( 2405551090 )
 
 # Panduan Sederhana
-Guide Singkat disini (isi introduction singkat,struktur bagaimana dijalankan di postman)
+Program ini memiliki 3 type kelas, yakni class untuk pertama yaitu class untuk masing-masing Entitas yang terletak pada package model, class untuk keperluan API dan HTTP Server pada package httpserver dan class untuk keperluan database pada package ___.
 
 # GET
+untuk mendapatkan record Seluruh Villa
+-
+untuk mendapatkan record Villa berdasarkan Id
+-
+untuk mendapatkan record Seluruh Customer
+-
+untuk mendapatkan record Customer berdasarkan Id
+-
+
+
 # POST
+menambahkan data baru pada Villa
+-
+data baru berhasil ditambahkan, berikut merupakan data dari tabel Villa
+
+menambahkan data baru pada Customer
+-
+data baru berhasil ditambahkan, berikut merupakan data dari tabel Customer
+
+menambahkan data baru pada Review
+-
+data baru berhasil ditambahkan, berikut merupakan data dari tabel Review
+
+menambahkan data baru pada Voucher
+-
+data baru berhasil ditambahkan, berikut merupakan data dari tabel Voucher
+
 # PUT
+Mengupdate data yang sudah ada pada Villa dengan ___
+
+Berikut merupakan hasil data yang sudah di update dengan Villa ___
+
+Mengupdate data yang sudah ada pada Customer dengan ___
+
+Berikut merupakan hasil data yang sudah di update dengan customer ___
+
+Mengupdate data yang sudah ada pada Review dengan ___
+
+Berikut merupakan hasil data yang sudah di update dengan Review ___
+
+Mengupdate data yang sudah ada pada Voucher dengan ___
+
+Berikut merupakan hasil data yang sudah di update dengan Voucher ___
+
 # DELETE
+
+# EROR
