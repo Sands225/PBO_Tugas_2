@@ -2,6 +2,7 @@ package routes;
 
 import handlers.VouchersHandler;
 import models.Voucher;
+import exceptions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,6 +14,7 @@ import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import utils.SendResponseUtils;
 
 public class VouchersRoutes implements HttpHandler {
     @Override
@@ -22,101 +24,89 @@ public class VouchersRoutes implements HttpHandler {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> response = new HashMap<>();
 
-        switch (method) {
-            case "GET":
-                if (path.matches("/vouchers/?")) {
-                    List<Voucher> vouchers = VouchersHandler.getAllVouchers();
-                    sendJsonResponse(exchange, vouchers);
-                    return;
+        try {
+            switch (method) {
+                case "GET":
+                    if (path.matches("/vouchers/?")) {
+                        List<Voucher> vouchers = VouchersHandler.getAllVouchers();
+                        sendJsonResponse(exchange, vouchers);
+                        return;
 
-                } else if (path.matches("/vouchers/\\d+/?")) {
-                    int id = Integer.parseInt(path.replaceAll("\\D+", ""));
-                    Voucher voucher = VouchersHandler.getVoucherById(id);
-
-                    if (voucher == null) {
-                        response.put("error", "Voucher not found");
-                        sendResponse(exchange, response, 404);
+                    } else if (path.matches("/vouchers/\\d+/?")) {
+                        int id = Integer.parseInt(path.replaceAll("\\D+", ""));
+                        Voucher voucher = VouchersHandler.getVoucherById(id);
+                        sendJsonResponse(exchange, voucher);
                         return;
                     }
+                    break;
 
-                    sendJsonResponse(exchange, voucher);
-                    return;
-                }
-                break;
+                case "POST":
+                    if (path.matches("/vouchers/?")) {
+                        InputStream is = exchange.getRequestBody();
+                        Voucher voucher = mapper.readValue(is, Voucher.class);
 
-            case "POST":
-                if (path.matches("/vouchers/?")) {
-                    InputStream is = exchange.getRequestBody();
-                    Voucher voucher = mapper.readValue(is, Voucher.class);
+                        boolean success = VouchersHandler.insertVoucher(voucher);
+                        if (!success) {
+                            throw new RuntimeException("Failed to create voucher");
+                        }
 
-                    boolean success = VouchersHandler.insertVoucher(voucher);
-                    if (!success) {
-                        response.put("error", "Failed to create voucher");
-                        sendResponse(exchange, response, 400);
+                        response.put("message", "Voucher created successfully");
+                        sendResponse(exchange, response, 200);
                         return;
                     }
+                    break;
 
-                    response.put("message", "Voucher created successfully");
-                    sendResponse(exchange, response, 200);
-                    return;
-                }
-                break;
+                case "PUT":
+                    if (path.matches("/vouchers/\\d+/?")) {
+                        int voucherId = Integer.parseInt(path.split("/")[2]);
 
-            case "PUT":
-                if (path.matches("/vouchers/\\d+/?")) {
-                    int voucherId = Integer.parseInt(path.split("/")[2]);
-                    InputStream is = exchange.getRequestBody();
-                    Voucher voucher = mapper.readValue(is, Voucher.class);
-                    voucher.setId(voucherId);
+                        VouchersHandler.getVoucherById(voucherId); // Will throw NotFoundException if not found
 
-                    // check if voucher exist
-                    Voucher existingVoucher = VouchersHandler.getVoucherById(voucherId);
-                    if (existingVoucher == null) {
-                        response.put("error", "Voucher not found");
-                        sendResponse(exchange, response, 404);
+                        InputStream is = exchange.getRequestBody();
+                        Voucher voucher = mapper.readValue(is, Voucher.class);
+                        voucher.setId(voucherId);
+
+                        boolean success = VouchersHandler.updateVoucher(voucher);
+                        if (!success) {
+                            throw new RuntimeException("Failed to update voucher");
+                        }
+
+                        response.put("message", "Voucher updated successfully");
+                        sendResponse(exchange, response, 200);
                         return;
                     }
+                    break;
 
-                    boolean success = VouchersHandler.updateVoucher(voucher);
-                    if (!success) {
-                        response.put("error", "Failed to update voucher");
-                        sendResponse(exchange, response, 400);
-                    }
+                case "DELETE":
+                    if (path.matches("/vouchers/\\d+/?")) {
+                        int voucherId = Integer.parseInt(path.split("/")[2]);
 
-                    response.put("message", "Voucher updated successfully");
-                    sendResponse(exchange, response, 200);
-                    return;
-                }
-                break;
+                        VouchersHandler.getVoucherById(voucherId); // Will throw NotFoundException if not found
 
-            case "DELETE":
-                if (path.matches("/vouchers/\\d+/?")) {
-                    int voucherId = Integer.parseInt(path.split("/")[2]);
-                    boolean success = VouchersHandler.deleteVoucherById(voucherId);
+                        boolean success = VouchersHandler.deleteVoucherById(voucherId);
+                        if (!success) {
+                            throw new RuntimeException("Failed to delete voucher");
+                        }
 
-                    // check if voucher exist
-                    Voucher existingVoucher = VouchersHandler.getVoucherById(voucherId);
-                    if (existingVoucher == null) {
-                        response.put("error", "Voucher not found");
-                        sendResponse(exchange, response, 404);
+                        response.put("message", "Voucher deleted successfully");
+                        sendResponse(exchange, response, 200);
                         return;
                     }
+                    break;
+            }
 
-                    if (!success) {
-                        response.put("error", "Failed to delete voucher");
-                        sendResponse(exchange, response, 400);
-                        return;
-                    }
+            throw new NotFoundException("Unsupported route or method: " + method + " " + path);
 
-                    response.put("message", "Voucher deleted successfully");
-                    sendResponse(exchange, response, 200);
-                    return;
-                }
-                break;
+        } catch (NotFoundException e) {
+            SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
+        } catch (IllegalArgumentException e) {
+            SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 400);
+        } catch (DatabaseException e) {
+            SendResponseUtils.sendErrorResponse(exchange, "Database error: " + e.getMessage(), 500);
+        } catch (Exception e) {
+            SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
+            e.printStackTrace();
         }
-
-        response.put("error", "Unsupported route or method");
-        sendResponse(exchange, response, 404);
     }
 
     public static void sendResponse(HttpExchange exchange, Map<String, Object> responseMap, int responseCode) throws IOException {
