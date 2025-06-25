@@ -142,7 +142,6 @@ public class CustomersRoutes implements HttpHandler {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 500);
         } catch (Exception e) {
             SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
-            e.printStackTrace();
         }
     }
 }
