@@ -1,5 +1,6 @@
 package handlers;
 
+import exceptions.*;
 import models.*;
 import db.Database;
 
@@ -27,8 +28,13 @@ public class VouchersHandler {
                 );
                 vouchers.add(voucher);
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving all vouchers", e);
+        }
+
+        if (vouchers.isEmpty()) {
+            throw new NotFoundException("No vouchers found");
         }
 
         return vouchers;
@@ -36,10 +42,13 @@ public class VouchersHandler {
 
     public static Voucher getVoucherById(int id) {
         String sql = "SELECT * FROM vouchers WHERE id = ?";
+
         try (Connection conn = Database.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
                 return new Voucher(
                         rs.getInt("id"),
@@ -49,11 +58,13 @@ public class VouchersHandler {
                         rs.getString("start_date"),
                         rs.getString("end_date")
                 );
+            } else {
+                throw new NotFoundException("Voucher with ID " + id + " not found");
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving voucher with ID " + id, e);
         }
-        return null;
     }
 
     // POST
@@ -62,17 +73,17 @@ public class VouchersHandler {
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, voucher.getCode());
             pstmt.setString(2, voucher.getDescription());
             pstmt.setDouble(3, voucher.getDiscount());
-            pstmt.setString(4, voucher.getStart_date()); // Format: "YYYY-MM-DD hh:mm:ss"
+            pstmt.setString(4, voucher.getStart_date());
             pstmt.setString(5, voucher.getEnd_date());
 
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
+            return pstmt.executeUpdate() > 0;
+
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Failed to insert voucher", e);
         }
     }
 
@@ -86,14 +97,19 @@ public class VouchersHandler {
             pstmt.setString(1, voucher.getCode());
             pstmt.setString(2, voucher.getDescription());
             pstmt.setDouble(3, voucher.getDiscount());
-            pstmt.setString(4, voucher.getStart_date()); // Format: "YYYY-MM-DD hh:mm:ss"
+            pstmt.setString(4, voucher.getStart_date());
             pstmt.setString(5, voucher.getEnd_date());
             pstmt.setInt(6, voucher.getId());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new NotFoundException("Voucher with ID " + voucher.getId() + " not found for update");
+            }
+
+            return true;
+
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Failed to update voucher with ID " + voucher.getId(), e);
         }
     }
   
@@ -105,11 +121,16 @@ public class VouchersHandler {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, voucherId);
-            return pstmt.executeUpdate() > 0;
-          
+            int rowsDeleted = pstmt.executeUpdate();
+
+            if (rowsDeleted == 0) {
+                throw new NotFoundException("Voucher with ID " + voucherId + " not found for deletion");
+            }
+
+            return true;
+
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Failed to delete voucher with ID " + voucherId, e);
         }
     }
 }

@@ -2,9 +2,14 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import exceptions.DatabaseException;
+import exceptions.NotFoundException;
+import exceptions.UnauthorizedException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static utils.SendResponseUtils.sendErrorResponse;
 
 public class AuthorizationHandler implements HttpHandler {
     private static final String API_KEY = "12345-SECRET-KEY";
@@ -15,17 +20,24 @@ public class AuthorizationHandler implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        String apiKey = exchange.getRequestHeaders().getFirst("X-API-KEY");
+    public void handle(HttpExchange exchange) {
+        try {
+            String apiKey = exchange.getRequestHeaders().getFirst("X-API-KEY");
 
-        if (API_KEY.equals(apiKey)) {
+            if (!API_KEY.equals(apiKey)) {
+                throw new UnauthorizedException("Invalid API Key");
+            }
+
             next.handle(exchange);
-        } else {
-            String response = "Invalid API Key";
-            exchange.sendResponseHeaders(401, response.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+
+        } catch (UnauthorizedException e) {
+            sendErrorResponse(exchange, e.getMessage(), 401);
+        } catch (NotFoundException e) {
+            sendErrorResponse(exchange, e.getMessage(), 404);
+        } catch (DatabaseException e) {
+            sendErrorResponse(exchange, "Database error: " + e.getMessage(), 500);
+        } catch (Exception e) {
+            sendErrorResponse(exchange, "Internal server error: " + e.getMessage(),500);
         }
     }
 }
