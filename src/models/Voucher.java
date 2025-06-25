@@ -8,6 +8,8 @@ public class Voucher {
     private String start_date;
     private String end_date;
 
+    public Voucher() {}
+
     public Voucher(int id, String code, String description, double discount, String start_date, String end_date) {
         this.id = id;
         this.code = code;
