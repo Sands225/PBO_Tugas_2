@@ -2,6 +2,7 @@ package routes;
 
 import handlers.*;
 import models.*;
+import validations.CustomerValidation;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -33,9 +34,7 @@ public class CustomersRoutes implements HttpHandler {
                 if (customer != null) {
                     sendJsonResponse(exchange, customer);
                 } else {
-                    response.put("error", "Customer not found");
-                    exchange.sendResponseHeaders(404, 0);
-                    exchange.getResponseBody().close();
+                    sendError(exchange, 404, "Customer not found");
                 }
                 return;
 
@@ -49,21 +48,39 @@ public class CustomersRoutes implements HttpHandler {
                 List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
                 response.put("reviews", reviews);
             }
+
         } else if (method.equals("POST")) {
             if (path.matches("/customers/?")) {
                 InputStream is = exchange.getRequestBody();
                 Customer customer = mapper.readValue(is, Customer.class);
 
+                // ✅ VALIDASI PER INPUT
+                if (!CustomerValidation.isNameValid(customer.getName())) {
+                    sendError(exchange, 400, "Nama tidak boleh kosong.");
+                    return;
+                }
+
+                if (!CustomerValidation.isEmailValid(customer.getEmail())) {
+                    sendError(exchange, 400, "Format email tidak valid.");
+                    return;
+                }
+
+                if (!CustomerValidation.isPhoneValid(customer.getPhone())) {
+                    sendError(exchange, 400, "Nomor telepon tidak valid. Minimal 10 digit angka.");
+                    return;
+                }
+
                 boolean success = CustomersHandler.addCustomer(customer);
                 if (success) {
                     response.put("message", "Customer registered successfully.");
+                    sendResponse(exchange, response);
                 } else {
-                    exchange.sendResponseHeaders(400, 0);
-                    response.put("error", "Failed to register customer. Data might be invalid.");
+                    sendError(exchange, 400, "Gagal menambahkan customer.");
                 }
-                sendResponse(exchange, response);
                 return;
-            } else if (path.matches("/customers/\\d+/bookings/?")) {
+            }
+
+            else if (path.matches("/customers/\\d+/bookings/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
 
                 InputStream is = exchange.getRequestBody();
@@ -74,12 +91,13 @@ public class CustomersRoutes implements HttpHandler {
                 if (success) {
                     response.put("message", "Booking successfully created.");
                 } else {
-                    exchange.sendResponseHeaders(400, 0);
-                    response.put("error", "Failed to create booking. Check data validity.");
+                    sendError(exchange, 400, "Failed to create booking. Check data validity.");
                 }
                 sendResponse(exchange, response);
                 return;
-            } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
+            }
+
+            else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
                 int customerId = Integer.parseInt(path.split("/")[2]);
                 int bookingId = Integer.parseInt(path.split("/")[4]);
 
@@ -91,24 +109,40 @@ public class CustomersRoutes implements HttpHandler {
                 if (success) {
                     response.put("message", "Review has been successfully added");
                 } else {
-                    response.put("error", "Failed to add review");
+                    sendError(exchange, 400, "Failed to add review");
                 }
                 sendResponse(exchange, response);
                 return;
             }
+
         } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
             int customerId = Integer.parseInt(path.split("/")[2]);
             InputStream is = exchange.getRequestBody();
             Customer customer = mapper.readValue(is, Customer.class);
             customer.setId(customerId);
 
+            if (!CustomerValidation.isNameValid(customer.getName())) {
+                sendError(exchange, 400, "Nama tidak boleh kosong.");
+                return;
+            }
+
+            if (!CustomerValidation.isEmailValid(customer.getEmail())) {
+                sendError(exchange, 400, "Format email tidak valid.");
+                return;
+            }
+
+            if (!CustomerValidation.isPhoneValid(customer.getPhone())) {
+                sendError(exchange, 400, "Nomor telepon tidak valid. Minimal 10 digit angka.");
+                return;
+            }
+
             boolean success = CustomersHandler.updateCustomer(customer);
             if (success) {
-                response.put("message", "Villa updated successfully");
+                response.put("message", "Customer updated successfully.");
+                sendResponse(exchange, response);
             } else {
-                response.put("error", "Failed to update villa");
+                sendError(exchange, 404, "Customer tidak ditemukan atau gagal diperbarui.");
             }
-            sendResponse(exchange, response);
             return;
         }
 
@@ -120,9 +154,21 @@ public class CustomersRoutes implements HttpHandler {
         String json = mapper.writeValueAsString(data);
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, json.getBytes().length);
-        OutputStream os = exchange.getResponseBody();
-        os.write(json.getBytes());
-        os.close();
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(json.getBytes());
+        }
+    }
+
+    private void sendError(HttpExchange exchange, int statusCode, String message) throws IOException {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", message);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(error);
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(statusCode, json.getBytes().length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(json.getBytes());
+        }
     }
 
     private void sendJsonResponse(HttpExchange exchange, Object data) throws IOException {
