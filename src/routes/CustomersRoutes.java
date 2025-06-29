@@ -3,6 +3,7 @@ package routes;
 import exceptions.*;
 import handlers.*;
 import models.*;
+import validations.CustomerValidation;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -127,7 +128,56 @@ public class CustomersRoutes implements HttpHandler {
                     break;
             }
 
-            throw new NotFoundException("Method or route not supported: " + method + " " + path);
+            else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
+                int customerId = Integer.parseInt(path.split("/")[2]);
+                int bookingId = Integer.parseInt(path.split("/")[4]);
+
+                InputStream is = exchange.getRequestBody();
+                Review review = mapper.readValue(is, Review.class);
+                review.setBooking(bookingId);
+
+                boolean success = ReviewsHandler.insertBookingReview(review);
+                if (success) {
+                    response.put("message", "Review has been successfully added");
+                } else {
+                    sendError(exchange, 400, "Failed to add review");
+                }
+                sendResponse(exchange, response);
+                return;
+            }
+
+        } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
+            int customerId = Integer.parseInt(path.split("/")[2]);
+            InputStream is = exchange.getRequestBody();
+            Customer customer = mapper.readValue(is, Customer.class);
+            customer.setId(customerId);
+
+            if (!CustomerValidation.isNameValid(customer.getName())) {
+                sendError(exchange, 400, "Nama tidak boleh kosong.");
+                return;
+            }
+
+            if (!CustomerValidation.isEmailValid(customer.getEmail())) {
+                sendError(exchange, 400, "Format email tidak valid.");
+                return;
+            }
+
+            if (!CustomerValidation.isPhoneValid(customer.getPhone())) {
+                sendError(exchange, 400, "Nomor telepon tidak valid. Minimal 10 digit angka.");
+                return;
+            }
+
+            boolean success = CustomersHandler.updateCustomer(customer);
+            if (success) {
+                response.put("message", "Customer updated successfully.");
+                sendResponse(exchange, response);
+            } else {
+                sendError(exchange, 404, "Customer tidak ditemukan atau gagal diperbarui.");
+            }
+            return;
+        }
+
+          throw new NotFoundException("Method or route not supported: " + method + " " + path);
 
         }  catch (NotFoundException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
@@ -143,4 +193,3 @@ public class CustomersRoutes implements HttpHandler {
             e.printStackTrace();
         }
     }
-}
