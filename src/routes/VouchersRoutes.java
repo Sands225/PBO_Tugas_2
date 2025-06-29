@@ -13,17 +13,16 @@ import java.util.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import utils.SendResponseUtils;
+import validations.VoucherValidation;
 
 public class VouchersRoutes implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) {
-        Map<String, Object> response = new HashMap<>();
+        String method = exchange.getRequestMethod();
+        String path = exchange.getRequestURI().getPath();
+        ObjectMapper mapper = new ObjectMapper();
 
         try {
-            String method = exchange.getRequestMethod();
-            String path = exchange.getRequestURI().getPath();
-            ObjectMapper mapper = new ObjectMapper();
-
             switch (method) {
                 case "GET":
                     if (path.matches("/vouchers/?")) {
@@ -36,6 +35,7 @@ public class VouchersRoutes implements HttpHandler {
                         Voucher voucher = VouchersHandler.getVoucherById(id);
                         SendResponseUtils.sendJsonResponse(exchange, voucher, "Voucher with ID " + id + " retrieved successfully");
                         return;
+
                     }
                     break;
 
@@ -44,11 +44,9 @@ public class VouchersRoutes implements HttpHandler {
                         InputStream is = exchange.getRequestBody();
                         Voucher voucher = mapper.readValue(is, Voucher.class);
 
-                        boolean success = VouchersHandler.insertVoucher(voucher);
-                        if (!success) {
-                            throw new RuntimeException("Failed to create voucher");
-                        }
+                        VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
 
+                        VouchersHandler.insertVoucher(voucher);
                         SendResponseUtils.sendSuccessResponse(exchange, "Voucher created successfully", voucher, 200);
                         return;
                     }
@@ -57,19 +55,14 @@ public class VouchersRoutes implements HttpHandler {
                 case "PUT":
                     if (path.matches("/vouchers/\\d+/?")) {
                         int voucherId = Integer.parseInt(path.split("/")[2]);
-
-                        // check if voucher exists
-                        VouchersHandler.getVoucherById(voucherId);
-
                         InputStream is = exchange.getRequestBody();
                         Voucher voucher = mapper.readValue(is, Voucher.class);
                         voucher.setId(voucherId);
 
-                        boolean success = VouchersHandler.updateVoucher(voucher);
-                        if (!success) {
-                            throw new RuntimeException("Failed to update voucher");
-                        }
+                        VouchersHandler.getVoucherById(voucherId);  // check if voucher exist
+                        VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
 
+                        VouchersHandler.updateVoucher(voucher);
                         SendResponseUtils.sendSuccessResponse(exchange, "Voucher updated successfully", voucher, 200);
                         return;
                     }
@@ -79,14 +72,10 @@ public class VouchersRoutes implements HttpHandler {
                     if (path.matches("/vouchers/\\d+/?")) {
                         int voucherId = Integer.parseInt(path.split("/")[2]);
 
-                        // check if voucher exists
-                        Voucher voucher = VouchersHandler.getVoucherById(voucherId);
+                        Voucher voucher = VouchersHandler.getVoucherById(voucherId);    // check if voucher exist
+                        VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
 
-                        boolean success = VouchersHandler.deleteVoucherById(voucherId);
-                        if (!success) {
-                            throw new RuntimeException("Failed to delete voucher");
-                        }
-
+                        VouchersHandler.deleteVoucherById(voucherId);
                         SendResponseUtils.sendSuccessResponse(exchange, "Voucher deleted successfully", voucher, 200);
                         return;
                     }
@@ -95,9 +84,6 @@ public class VouchersRoutes implements HttpHandler {
                 default:
                     SendResponseUtils.sendErrorResponse(exchange, "Method not allowed", 405);
             }
-
-            SendResponseUtils.sendErrorResponse(exchange, "Path " + path + " not found", 404);
-
         } catch (NotFoundException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
         } catch (DatabaseException e) {
@@ -108,7 +94,6 @@ public class VouchersRoutes implements HttpHandler {
             SendResponseUtils.sendErrorResponse(exchange, "I/O error: " + e.getMessage(), 500);
         } catch (Exception e) {
             SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
-            e.printStackTrace(); // Optional: for debugging
         }
     }
 }
