@@ -98,7 +98,7 @@ public class VillasHandler {
     }
 
     // POST
-    public static boolean insertVilla(Villa villa) {
+    public static void insertVilla(Villa villa) {
         String sql = "INSERT INTO villas (name, description, address) VALUES (?, ?, ?)";
 
         try (Connection conn = Database.getConnection();
@@ -106,52 +106,33 @@ public class VillasHandler {
             pstmt.setString(1, villa.getName());
             pstmt.setString(2, villa.getDescription());
             pstmt.setString(3, villa.getAddress());
-
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
         } catch (SQLException e) {
             throw new DatabaseException("Error inserting customers", e);
         }
     }
 
     // UPDATE
-    public static boolean updateVilla(Villa villa) {
+    public static void updateVilla(Villa villa) {
         String sql = "UPDATE villas SET name = ?, description = ?, address = ? WHERE id = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, villa.getName());
             pstmt.setString(2, villa.getDescription());
             pstmt.setString(3, villa.getAddress());
             pstmt.setInt(4, villa.getId());
-
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new NotFoundException("Villa with ID " + villa.getId() + " not found.");
-            }
-
-            return true;
         } catch (SQLException e) {
             throw new DatabaseException("Error updating customers", e);
         }
     }
 
     // DELETE
-    public static boolean deleteVillaById(int villaId) {
+    public static void deleteVillaById(int villaId) {
         String sql = "DELETE FROM villas WHERE id = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, villaId);
-
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new NotFoundException("Villa with ID " + villaId + " not found.");
-            }
-
-            return true;
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving customers", e);
+            throw new DatabaseException("Error deleting customers", e);
         }
     }
 }

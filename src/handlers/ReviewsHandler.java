@@ -71,7 +71,7 @@ public class ReviewsHandler {
     }
 
     // POST
-    public static boolean insertBookingReview(Review review) {
+    public static void insertBookingReview(Review review) {
         String sql =
                 "INSERT INTO reviews (booking, star, title, content) " +
                 "VALUES (?, ?, ?, ?)";
@@ -82,8 +82,6 @@ public class ReviewsHandler {
             pstmt.setInt(2, review.getStar());
             pstmt.setString(3, review.getTitle());
             pstmt.setString(4, review.getContent());
-
-            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DatabaseException("Failed to insert review", e);
         }
