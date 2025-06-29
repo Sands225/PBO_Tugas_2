@@ -60,18 +60,15 @@ public class VillasHandler {
         }
     }
 
-    public static List<Map<String, Object>> getAvailableVillas(String ciDate, String coDate) {
-        List<Map<String, Object>> villas = new ArrayList<>();
-        String sql =
-                "SELECT DISTINCT v.* " +
+    public static List<Villa> getAvailableVillas(String ciDate, String coDate) {
+        List<Villa> villas = new ArrayList<>();
+        String sql = "SELECT DISTINCT v.* " +
                 "FROM villas v " +
                 "JOIN room_types r ON r.villa = v.id " +
-                "WHERE r.id NOT IN ( " +
-                "    SELECT room_type " +
-                "    FROM bookings " +
-                "    WHERE NOT ( " +
-                "        checkout_date <= ? OR checkin_date >= ? " +
-                "    ) " +
+                "WHERE NOT EXISTS ( " +
+                "    SELECT 1 FROM bookings b " +
+                "    WHERE b.room_type = r.id " +
+                "    AND NOT (b.checkout_date <= ? OR b.checkin_date >= ?) " +
                 ")";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -79,11 +76,12 @@ public class VillasHandler {
             stmt.setString(2, coDate);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Map<String, Object> villa = new HashMap<>();
-                villa.put("id", rs.getInt("id"));
-                villa.put("name", rs.getString("name"));
-                villa.put("description", rs.getString("description"));
-                villa.put("address", rs.getString("address"));
+                Villa villa = new Villa(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("address")
+                );
                 villas.add(villa);
             }
         } catch (SQLException e) {
@@ -106,6 +104,7 @@ public class VillasHandler {
             pstmt.setString(1, villa.getName());
             pstmt.setString(2, villa.getDescription());
             pstmt.setString(3, villa.getAddress());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Error inserting customers", e);
         }
@@ -120,6 +119,7 @@ public class VillasHandler {
             pstmt.setString(2, villa.getDescription());
             pstmt.setString(3, villa.getAddress());
             pstmt.setInt(4, villa.getId());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Error updating customers", e);
         }
@@ -131,6 +131,7 @@ public class VillasHandler {
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, villaId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Error deleting customers", e);
         }
