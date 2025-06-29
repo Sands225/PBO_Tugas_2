@@ -9,24 +9,36 @@ public class CustomerValidation {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?\\d{10,15}$");
 
-    public static boolean isCustomerValid(Customer customer) {
-        return isNameValid(customer.getName()) &&
-                isEmailValid(customer.getEmail()) &&
-                isPhoneValid(customer.getPhone());
+    public static void isCustomerValid(Customer customer) {
+        if (!isNameValid(customer.getName())) {
+            throw new IllegalArgumentException("Invalid name: must contain only letters, dashes, and spaces (max 50 chars).");
+        }
+        if (!isEmailValid(customer.getEmail())) {
+            throw new IllegalArgumentException("Invalid email format.");
+        }
+        if (!isPhoneValid(customer.getPhone())) {
+            throw new IllegalArgumentException("Invalid phone number: must contain 10 to 15 digits.");
+        }
     }
 
     public static boolean isNameValid(String name) {
-        if (name == null) return false;
+        if (name == null) {
+            throw new IllegalArgumentException("Name cannot be null.");
+        }
         return NAME_PATTERN.matcher(name.trim()).matches();
     }
 
     public static boolean isEmailValid(String email) {
-        if (email == null) return false;
+        if (email == null) {
+            throw new IllegalArgumentException("Email cannot be null.");
+        }
         return EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 
     public static boolean isPhoneValid(String phone) {
-        if (phone == null) return false;
+        if (phone == null) {
+            throw new IllegalArgumentException("Phone cannot be null.");
+        }
         return PHONE_PATTERN.matcher(phone.trim()).matches();
     }
 }
