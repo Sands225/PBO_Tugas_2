@@ -1,6 +1,7 @@
 package utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
@@ -49,6 +50,27 @@ public class SendResponseUtils {
         successResponse.put("data", data);
 
         try {
+            sendResponse(exchange, successResponse, statusCode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendSuccessResponse(HttpExchange exchange, String message, Object data, int statusCode, boolean excludeId) {
+        Map<String, Object> successResponse = new LinkedHashMap<>();
+        successResponse.put("status", "success");
+        successResponse.put("message", message);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            if (excludeId && data != null) {
+                ObjectNode node = mapper.valueToTree(data);
+                node.remove("id");
+                successResponse.put("data", node);
+            } else {
+                successResponse.put("data", data);
+            }
             sendResponse(exchange, successResponse, statusCode);
         } catch (IOException e) {
             e.printStackTrace();
