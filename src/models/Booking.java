@@ -13,6 +13,24 @@ public class Booking {
     private int has_checkedin;
     private int has_checkedout;
 
+    public Booking() {}
+
+    public Booking(int id, int customer, int room_type, String checkin_date, String checkout_date,
+                   int price, Integer voucher, int final_price, String payment_status,
+                   int has_checkedin, int has_checkedout) {
+        this.id = id;
+        this.customer = customer;
+        this.room_type = room_type;
+        this.checkin_date = checkin_date;
+        this.checkout_date = checkout_date;
+        this.price = price;
+        this.voucher = voucher;
+        this.final_price = final_price;
+        this.payment_status = payment_status;
+        this.has_checkedin = has_checkedin;
+        this.has_checkedout = has_checkedout;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

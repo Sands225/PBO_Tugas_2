@@ -1,5 +1,6 @@
 package routes;
 
+import exceptions.*;
 import handlers.*;
 import models.*;
 import validations.CustomerValidation;
@@ -13,6 +14,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import utils.SendResponseUtils;
+import validations.CustomerValidation;
+
+import static utils.SendResponseUtils.sendResponse;
 
 public class CustomersRoutes implements HttpHandler {
     @Override
@@ -146,38 +151,16 @@ public class CustomersRoutes implements HttpHandler {
             return;
         }
 
-        sendResponse(exchange, response);
-    }
+          throw new NotFoundException("Method or route not supported: " + method + " " + path);
 
-    private void sendResponse(HttpExchange exchange, Map<String, Object> data) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(json.getBytes());
-        }
-    }
-
-    private void sendError(HttpExchange exchange, int statusCode, String message) throws IOException {
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", message);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(error);
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(statusCode, json.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(json.getBytes());
-        }
-    }
-
-    private void sendJsonResponse(HttpExchange exchange, Object data) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(json.getBytes());
+        } catch (NotFoundException e) {
+            SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
+        } catch (IllegalArgumentException e) {
+            SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 400);
+        } catch (RuntimeException e) {
+            SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 500);
+        } catch (Exception e) {
+            SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
         }
     }
 }

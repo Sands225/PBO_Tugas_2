@@ -1,23 +1,26 @@
 package handlers;
 
+import exceptions.*;
 import models.*;
 import db.Database;
 
 import java.sql.*;
 import java.util.*;
 
-public class RoomTypesHandler {
+public class RoomsHandler {
     //  GET
-    public static List<RoomType> getRoomsByVillaId(int villaId) {
-        List<RoomType> rooms = new ArrayList<>();
+    public static List<Room> getRoomsByVillaId(int villaId) {
+        List<Room> rooms = new ArrayList<>();
         String sql = "SELECT * FROM room_types WHERE villa = ?";
+
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, villaId);
             ResultSet rs = pstmt.executeQuery();
+
             while (rs.next()) {
-                RoomType room = new RoomType();
+                Room room = new Room();
                 room.setId(rs.getInt("id"));
                 room.setVilla(rs.getInt("villa"));
                 room.setName(rs.getString("name"));
@@ -34,19 +37,62 @@ public class RoomTypesHandler {
                 room.setHas_fridge(rs.getInt("has_fridge"));
                 rooms.add(room);
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving rooms for villa ID " + villaId, e);
         }
+
+        if (rooms.isEmpty()) {
+            throw new NotFoundException("No rooms found for villa ID " + villaId);
+        }
+
         return rooms;
     }
 
+    public static Room getRoomByVillaAndRoomId(int villaId, int roomId) {
+        String sql = "SELECT * FROM room_types WHERE id = ? AND villa = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, roomId);
+            stmt.setInt(2, villaId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Room(
+                        rs.getInt("id"),
+                        rs.getInt("villa"),
+                        rs.getString("name"),
+                        rs.getInt("quantity"),
+                        rs.getInt("capacity"),
+                        rs.getInt("price"),
+                        rs.getString("bed_size"),
+                        rs.getInt("has_desk"),
+                        rs.getInt("has_ac"),
+                        rs.getInt("has_tv"),
+                        rs.getInt("has_wifi"),
+                        rs.getInt("has_shower"),
+                        rs.getInt("has_hotwater"),
+                        rs.getInt("has_fridge")
+                );
+            } else {
+                throw new NotFoundException("Room with ID " + roomId + " for villa ID " + villaId + " not found");
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Error retrieving room ID " + roomId + " for villa ID " + villaId, e);
+        }
+    }
+
     // POST
-    public static boolean insertRoomType(RoomType room) {
+    public static boolean insertRoomType(Room room) {
         String sql = "INSERT INTO room_types (villa, name, quantity, capacity, price, bed_size, has_desk, has_ac, has_tv, has_wifi, has_shower, has_hotwater, has_fridge) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, room.getVilla());
             pstmt.setString(2, room.getName());
             pstmt.setInt(3, room.getQuantity());
@@ -61,16 +107,19 @@ public class RoomTypesHandler {
             pstmt.setInt(12, room.getHas_hotwater());
             pstmt.setInt(13, room.getHas_fridge());
 
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Failed to insert room", e);
         }
     }
 
     // PUT / UPDATE
-    public static boolean updateRoomType(RoomType room) {
-        String sql = "UPDATE room_types SET name = ?, quantity = ?, capacity = ?, price = ?, bed_size = ?, has_desk = ?, has_ac = ?, has_tv = ?, has_wifi = ?, has_shower = ?, has_hotwater = ?, has_fridge = ? WHERE id = ? AND villa = ?";
+    public static boolean updateRoomType(Room room) {
+        String sql = "UPDATE room_types SET name = ?, quantity = ?, capacity = ?, price = ?, bed_size = ?, has_desk = ?, has_ac = ?, has_tv = ?, has_wifi = ?, has_shower = ?, has_hotwater = ?, has_fridge = ? " +
+                "WHERE id = ? AND villa = ?";
+
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -89,25 +138,32 @@ public class RoomTypesHandler {
             pstmt.setInt(13, room.getId());
             pstmt.setInt(14, room.getVilla());
 
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Failed to update room ID " + room.getId() + " for villa ID " + room.getVilla(), e);
         }
     }
 
     // DELETE
     public static boolean deleteRoomTypeById(int roomId, int villaId) {
         String sql = "DELETE FROM room_types WHERE id = ? AND villa = ?";
+
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, roomId);
             pstmt.setInt(2, villaId);
-            return pstmt.executeUpdate() > 0;
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new NotFoundException("Room with ID " + roomId + " in villa ID " + villaId + " not found");
+            }
+
+            return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DatabaseException("Failed to delete room ID " + roomId + " from villa ID " + villaId, e);
         }
     }
 }

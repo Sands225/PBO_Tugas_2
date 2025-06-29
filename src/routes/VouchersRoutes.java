@@ -1,25 +1,23 @@
 package routes;
 
-import handlers.VillasHandler;
 import handlers.VouchersHandler;
 import models.Voucher;
+import exceptions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.util.*;
+import utils.SendResponseUtils;
 
 public class VouchersRoutes implements HttpHandler {
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        String path = exchange.getRequestURI().getPath();
-        ObjectMapper mapper = new ObjectMapper();
+    public void handle(HttpExchange exchange) {
         Map<String, Object> response = new HashMap<>();
 
         if (method.equals("GET")) {

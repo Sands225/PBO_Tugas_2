@@ -1,5 +1,7 @@
 package handlers;
 
+import exceptions.DatabaseException;
+import exceptions.NotFoundException;
 import models.*;
 import db.Database;
 
@@ -28,29 +30,15 @@ public class ReviewsHandler {
                 reviews.add(review);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving reviews with villa ID " + villaId, e);
+        }
+
+        if (reviews.isEmpty()) {
+            throw new NotFoundException("No reviews found with villa ID " + villaId);
         }
         return reviews;
     }
 
-    public static boolean insertBookingReview(Review review) {
-        String sql =
-                "INSERT INTO reviews (booking, star, title, content)" +
-                "VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, review.getBooking());
-            pstmt.setInt(2, review.getStar());
-            pstmt.setString(3, review.getTitle());
-            pstmt.setString(4, review.getContent());
-
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return  false;
-        }
-    }
     public static List<Map<String, Object>> getReviewsByCustomerId(int customerId) {
         List<Map<String, Object>> reviews = new ArrayList<>();
         String sql =
@@ -72,9 +60,32 @@ public class ReviewsHandler {
                 reviews.add(review);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving reviews with customer ID " + customerId, e);
         }
+
+        if (reviews.isEmpty()) {
+            throw new NotFoundException("No reviews found with customer ID " + customerId);
+        }
+
         return reviews;
     }
 
+    // POST
+    public static boolean insertBookingReview(Review review) {
+        String sql =
+                "INSERT INTO reviews (booking, star, title, content)" +
+                "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, review.getBooking());
+            pstmt.setInt(2, review.getStar());
+            pstmt.setString(3, review.getTitle());
+            pstmt.setString(4, review.getContent());
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to insert review", e);
+        }
+    }
 }

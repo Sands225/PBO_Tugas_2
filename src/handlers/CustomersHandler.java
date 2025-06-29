@@ -1,5 +1,7 @@
 package handlers;
 
+import exceptions.DatabaseException;
+import exceptions.NotFoundException;
 import models.*;
 import db.Database;
 import validations.CustomerValidation;
@@ -26,8 +28,13 @@ public class CustomersHandler {
                 );
                 customers.add(customer);
             }
+
+            if (customers.isEmpty()) {
+                throw new NotFoundException("No customers found.");
+            }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Error retrieving customers", e);
         }
 
         return customers;
@@ -46,11 +53,12 @@ public class CustomersHandler {
                         rs.getString("email"),
                         rs.getString("phone")
                 );
+            } else {
+                throw new NotFoundException("Villa with ID " + id + " not found.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to fetch villa with ID " + id, e);
         }
-        return null;
     }
 // POST
 public static boolean addCustomer(Customer customer) {
@@ -59,18 +67,14 @@ public static boolean addCustomer(Customer customer) {
     try (Connection conn = Database.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        if (!CustomerValidation.isCustomerValid(customer)) {
-            throw new IllegalArgumentException("Customer data is invalid (name, email, or phone incorrect).");
-        }
-
         pstmt.setString(1, customer.getName());
         pstmt.setString(2, customer.getEmail());
         pstmt.setString(3, customer.getPhone());
 
-        return pstmt.executeUpdate() > 0;
+        int affectedRows = pstmt.executeUpdate();
+        return affectedRows > 0;
     } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
+        throw new DatabaseException("Failed to insert customer", e);
     }
 }
 
@@ -85,10 +89,10 @@ public static boolean addCustomer(Customer customer) {
             pstmt.setString(3, customer.getPhone());
             pstmt.setInt(4, customer.getId());
 
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return  false;
+            throw new DatabaseException("Failed to update customer", e);
         }
     }
 }
