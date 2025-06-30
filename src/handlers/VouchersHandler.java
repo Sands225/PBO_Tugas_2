@@ -28,15 +28,12 @@ public class VouchersHandler {
                 );
                 vouchers.add(voucher);
             }
-
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving all vouchers", e);
+            throw new DatabaseException("Failed to retrieve vouchers", e);
         }
-
         if (vouchers.isEmpty()) {
             throw new NotFoundException("No vouchers found");
         }
-
         return vouchers;
     }
 
@@ -61,74 +58,54 @@ public class VouchersHandler {
             } else {
                 throw new NotFoundException("Voucher with ID " + id + " not found");
             }
-
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving voucher with ID " + id, e);
+            throw new DatabaseException("Failed to retrieve voucher with ID " + id, e);
         }
     }
 
     // POST
-    public static boolean insertVoucher(Voucher voucher) {
+    public static void insertVoucher(Voucher voucher) {
         String sql = "INSERT INTO vouchers (code, description, discount, start_date, end_date) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, voucher.getCode());
             pstmt.setString(2, voucher.getDescription());
             pstmt.setDouble(3, voucher.getDiscount());
             pstmt.setString(4, voucher.getStart_date());
             pstmt.setString(5, voucher.getEnd_date());
-
-            return pstmt.executeUpdate() > 0;
-
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to insert voucher", e);
         }
     }
 
     // PUT
-    public static boolean updateVoucher(Voucher voucher) {
+    public static void updateVoucher(Voucher voucher) {
         String sql = "UPDATE vouchers SET code = ?, description = ?, discount = ?, start_date = ?, end_date = ? WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, voucher.getCode());
             pstmt.setString(2, voucher.getDescription());
             pstmt.setDouble(3, voucher.getDiscount());
             pstmt.setString(4, voucher.getStart_date());
             pstmt.setString(5, voucher.getEnd_date());
             pstmt.setInt(6, voucher.getId());
-
-            int rowsUpdated = pstmt.executeUpdate();
-            if (rowsUpdated == 0) {
-                throw new NotFoundException("Voucher with ID " + voucher.getId() + " not found for update");
-            }
-
-            return true;
-
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to update voucher with ID " + voucher.getId(), e);
         }
     }
   
     // DELETE
-    public static boolean deleteVoucherById(int voucherId) {
+    public static void deleteVoucherById(int voucherId) {
         String sql = "DELETE FROM vouchers WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, voucherId);
-            int rowsDeleted = pstmt.executeUpdate();
-
-            if (rowsDeleted == 0) {
-                throw new NotFoundException("Voucher with ID " + voucherId + " not found for deletion");
-            }
-
-            return true;
-
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to delete voucher with ID " + voucherId, e);
         }

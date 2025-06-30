@@ -4,7 +4,6 @@ import exceptions.DatabaseException;
 import exceptions.NotFoundException;
 import models.*;
 import db.Database;
-import validations.CustomerValidation;
 
 import java.sql.*;
 import java.util.*;
@@ -32,11 +31,9 @@ public class CustomersHandler {
             if (customers.isEmpty()) {
                 throw new NotFoundException("No customers found.");
             }
-
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving customers", e);
+            throw new DatabaseException("Failed to retrieve customers", e);
         }
-
         return customers;
     }
 
@@ -54,43 +51,37 @@ public class CustomersHandler {
                         rs.getString("phone")
                 );
             } else {
-                throw new NotFoundException("Villa with ID " + id + " not found.");
+                throw new NotFoundException("Customer with ID " + id + " not found.");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to fetch villa with ID " + id, e);
+            throw new DatabaseException("Failed to retrieve customer with ID " + id, e);
         }
     }
-// POST
-public static boolean addCustomer(Customer customer) {
-    String sql = "INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)";
+    // POST
+    public static void addCustomer(Customer customer) {
+        String sql = "INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)";
 
-    try (Connection conn = Database.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-        pstmt.setString(1, customer.getName());
-        pstmt.setString(2, customer.getEmail());
-        pstmt.setString(3, customer.getPhone());
-
-        int affectedRows = pstmt.executeUpdate();
-        return affectedRows > 0;
-    } catch (SQLException e) {
-        throw new DatabaseException("Failed to insert customer", e);
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, customer.getName());
+            pstmt.setString(2, customer.getEmail());
+            pstmt.setString(3, customer.getPhone());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to add customer", e);
+        }
     }
-}
 
-// UPDATE
-    public static boolean updateCustomer(Customer customer) {
+    // UPDATE
+    public static void updateCustomer(Customer customer) {
         String sql = "UPDATE customers SET name = ?, email = ?, phone = ? WHERE id = ?";
         try (Connection conn = Database.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, customer.getName());
             pstmt.setString(2, customer.getEmail());
             pstmt.setString(3, customer.getPhone());
             pstmt.setInt(4, customer.getId());
-
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to update customer", e);
         }

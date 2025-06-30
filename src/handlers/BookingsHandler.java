@@ -37,15 +37,12 @@ public class BookingsHandler {
                 booking.put("has_checkedout", rs.getInt("has_checkedout"));
                 bookings.add(booking);
             }
-
         } catch (SQLException e) {
             throw new DatabaseException("Failed to retrieve bookings with villa ID " + villaId, e);
         }
-
         if (bookings.isEmpty()) {
             throw new NotFoundException("No bookings found for villa ID " + villaId);
         }
-
         return bookings;
     }
 
@@ -77,76 +74,69 @@ public class BookingsHandler {
                 booking.put("has_checkedout", rs.getInt("has_checkedout"));
                 bookings.add(booking);
             }
-
         } catch (SQLException e) {
             throw new DatabaseException("Failed to retrieve bookings with customer ID " + customerId, e);
         }
-
         if (bookings.isEmpty()) {
             throw new NotFoundException("No bookings found for customer ID " + customerId);
         }
-
         return bookings;
     }
 
-    public static Booking getBookingByCustomerAndBookingId(int customerId, int bookingId) {
+    public static void getBookingByCustomerAndBookingId(int customerId, int bookingId) {
         String sql = "SELECT * FROM bookings WHERE id = ? AND customer = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, bookingId);
             stmt.setInt(2, customerId);
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
-                return new Booking(
-                        rs.getInt("id"),
-                        rs.getInt("customer"),
-                        rs.getInt("room_type"),
-                        rs.getString("checkin_date"),
-                        rs.getString("checkout_date"),
-                        rs.getInt("price"),
-                        (Integer) rs.getObject("voucher"), // handles nulls
-                        rs.getInt("final_price"),
-                        rs.getString("payment_status"),
-                        rs.getInt("has_checkedin"),
-                        rs.getInt("has_checkedout")
-                );
+                rs.getInt("id");
+                rs.getInt("customer");
+                rs.getInt("room_type");
+                rs.getString("checkin_date");
+                rs.getString("checkout_date");
+                rs.getInt("price");
+                rs.getObject("voucher");
+                rs.getInt("final_price");
+                rs.getString("payment_status");
+                rs.getInt("has_checkedin");
+                rs.getInt("has_checkedout");
             } else {
-                throw new NotFoundException("No bookings found for booking ID " + bookingId + " and customer ID " + customerId);
+                throw new NotFoundException("No booking found for booking ID " + bookingId + " and customer ID " + customerId);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to retrieve bookings with booking ID " + bookingId + " and customer ID " + customerId, e);
+            throw new DatabaseException("Failed to retrieve booking with booking ID " + bookingId + " and customer ID " + customerId, e);
         }
     }
 
     // POST
-        public static boolean insertBooking (Booking booking){
-            String sql = "INSERT INTO bookings (customer, room_type, checkin_date, checkout_date, price, voucher, final_price, payment_status, has_checkedin, has_checkedout) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public static void insertBooking (Booking booking) {
+        String sql = "INSERT INTO bookings (customer, room_type, checkin_date, checkout_date, price, voucher, final_price, payment_status, has_checkedin, has_checkedout) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-            try (Connection conn = Database.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, booking.getCustomer());
+            pstmt.setInt(2, booking.getRoom_type());
+            pstmt.setString(3, booking.getCheckin_date());
+            pstmt.setString(4, booking.getCheckout_date());
+            pstmt.setInt(5, booking.getPrice());
 
-                pstmt.setInt(1, booking.getCustomer());
-                pstmt.setInt(2, booking.getRoom_type());
-                pstmt.setString(3, booking.getCheckin_date());
-                pstmt.setString(4, booking.getCheckout_date());
-                pstmt.setInt(5, booking.getPrice());
-
-                if (booking.getVoucher() != null) {
-                    pstmt.setInt(6, booking.getVoucher());
-                } else {
-                    pstmt.setNull(6, java.sql.Types.INTEGER);
-                }
-
-                pstmt.setInt(7, booking.getFinal_price());
-                pstmt.setString(8, booking.getPayment_status());
-                pstmt.setInt(9, booking.getHas_checkedin());
-                pstmt.setInt(10, booking.getHas_checkedout());
-
-                int affectedRows = pstmt.executeUpdate();
-                return affectedRows > 0;
-            } catch (SQLException e) {
-                throw new DatabaseException("Failed to insert booking", e);
+            if (booking.getVoucher() != null) {
+                pstmt.setInt(6, booking.getVoucher());
+            } else {
+                pstmt.setNull(6, java.sql.Types.INTEGER);
             }
+
+            pstmt.setInt(7, booking.getFinal_price());
+            pstmt.setString(8, booking.getPayment_status());
+            pstmt.setInt(9, booking.getHas_checkedin());
+            pstmt.setInt(10, booking.getHas_checkedout());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to add booking", e);
         }
+    }
 }

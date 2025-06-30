@@ -27,11 +27,11 @@ public class VillasHandler {
                 villas.add(villa);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving villas", e);
+            throw new DatabaseException("Failed to retrieve villas", e);
         }
 
         if (villas.isEmpty()) {
-            throw new NotFoundException("No villa found.");
+            throw new NotFoundException("No villa found");
         }
 
         return villas;
@@ -53,25 +53,22 @@ public class VillasHandler {
                         rs.getString("address")
                 );
             } else {
-                throw new NotFoundException("Villa with ID " + id + " not found.");
+                throw new NotFoundException("Villa with ID " + id + " not found");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to fetch villa with ID " + id, e);
+            throw new DatabaseException("Failed to retrieve villa with ID " + id, e);
         }
     }
 
-    public static List<Map<String, Object>> getAvailableVillas(String ciDate, String coDate) {
-        List<Map<String, Object>> villas = new ArrayList<>();
-        String sql =
-                "SELECT DISTINCT v.* " +
+    public static List<Villa> getAvailableVillas(String ciDate, String coDate) {
+        List<Villa> villas = new ArrayList<>();
+        String sql = "SELECT DISTINCT v.* " +
                 "FROM villas v " +
                 "JOIN room_types r ON r.villa = v.id " +
-                "WHERE r.id NOT IN ( " +
-                "    SELECT room_type " +
-                "    FROM bookings " +
-                "    WHERE NOT ( " +
-                "        checkout_date <= ? OR checkin_date >= ? " +
-                "    ) " +
+                "WHERE NOT EXISTS ( " +
+                "    SELECT 1 FROM bookings b " +
+                "    WHERE b.room_type = r.id " +
+                "    AND NOT (b.checkout_date <= ? OR b.checkin_date >= ?) " +
                 ")";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -79,26 +76,25 @@ public class VillasHandler {
             stmt.setString(2, coDate);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Map<String, Object> villa = new HashMap<>();
-                villa.put("id", rs.getInt("id"));
-                villa.put("name", rs.getString("name"));
-                villa.put("description", rs.getString("description"));
-                villa.put("address", rs.getString("address"));
+                Villa villa = new Villa(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("address")
+                );
                 villas.add(villa);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to fetch available villas", e);
+            throw new DatabaseException("Failed to retrieve available villas", e);
         }
-
         if (villas.isEmpty()) {
             throw new NotFoundException("No available villas found in the selected date range");
         }
-
         return villas;
     }
 
     // POST
-    public static boolean insertVilla(Villa villa) {
+    public static void insertVilla(Villa villa) {
         String sql = "INSERT INTO villas (name, description, address) VALUES (?, ?, ?)";
 
         try (Connection conn = Database.getConnection();
@@ -106,52 +102,36 @@ public class VillasHandler {
             pstmt.setString(1, villa.getName());
             pstmt.setString(2, villa.getDescription());
             pstmt.setString(3, villa.getAddress());
-
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Error inserting customers", e);
+            throw new DatabaseException("Failed to add villa ", e);
         }
     }
 
     // UPDATE
-    public static boolean updateVilla(Villa villa) {
+    public static void updateVilla(Villa villa) {
         String sql = "UPDATE villas SET name = ?, description = ?, address = ? WHERE id = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, villa.getName());
             pstmt.setString(2, villa.getDescription());
             pstmt.setString(3, villa.getAddress());
             pstmt.setInt(4, villa.getId());
-
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new NotFoundException("Villa with ID " + villa.getId() + " not found.");
-            }
-
-            return true;
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Error updating customers", e);
+            throw new DatabaseException("Failed to update villa", e);
         }
     }
 
     // DELETE
-    public static boolean deleteVillaById(int villaId) {
+    public static void deleteVillaById(int villaId) {
         String sql = "DELETE FROM villas WHERE id = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, villaId);
-
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new NotFoundException("Villa with ID " + villaId + " not found.");
-            }
-
-            return true;
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving customers", e);
+            throw new DatabaseException("Failed to delete villa", e);
         }
     }
 }

@@ -13,82 +13,87 @@ import java.util.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import utils.SendResponseUtils;
+import validations.VoucherValidation;
 
 public class VouchersRoutes implements HttpHandler {
-
     @Override
     public void handle(HttpExchange exchange) {
-        Map<String, Object> response = new HashMap<>();
-
-        if (method.equals("GET")) {
-            if (path.matches("/vouchers/?")) {
-                List<Voucher> vouchers = VouchersHandler.getAllVouchers();
-                sendJsonResponse(exchange, vouchers);
-                return;
-            } else if (path.matches("/vouchers/\\d+/?")) {
-                InputStream is = exchange.getRequestBody();
-                Voucher voucher = mapper.readValue(is, Voucher.class);
-
-                boolean success = VouchersHandler.insertVoucher(voucher);
-                if (success) {
-                    response.put(Utils.MESSAGE_KEY, Utils.VOUCHER_CREATED_SUCCESS);
-                } else {
-                    response.put(Utils.ERROR_KEY, Utils.VOUCHER_CREATE_FAILED);
-                }
-                sendResponse(exchange, response);
-                return;
-            }
-        } else if (method.equals("POST") && path.matches("/vouchers/?")) {
-            response.put(Utils.MESSAGE_KEY, "Create voucher");
-        } else if (method.equals("PUT") && path.matches("/vouchers/\\d+/?")) {
-            int voucherId = Integer.parseInt(path.split("/")[2]);
-            InputStream is = exchange.getRequestBody();
-            Voucher voucher = mapper.readValue(is, Voucher.class);
-            voucher.setId(voucherId);
-
-            boolean success = VouchersHandler.updateVoucher(voucher);
-            if (success) {
-                response.put(Utils.MESSAGE_KEY, Utils.VOUCHER_UPDATED_SUCCESS);
-            } else {
-                response.put(Utils.ERROR_KEY, Utils.VOUCHER_UPDATE_FAILED);
-            }
-            sendResponse(exchange, response);
-            return;
-        } else if (method.equals("DELETE") && path.matches("/vouchers/\\d+/?")) {
-            int voucherId = Integer.parseInt(path.split("/")[2]);
-            boolean success = VillasHandler.deleteVillaById(voucherId);
-
-            if (success) {
-                response.put(Utils.MESSAGE_KEY, Utils.VOUCHER_DELETED_SUCCESS);
-            } else {
-                response.put(Utils.ERROR_KEY, Utils.VOUCHER_DELETE_FAILED);
-            }
-            sendResponse(exchange, response);
-            return;
-        }
-
-        sendResponse(exchange, response);
-    }
-
-    public void sendResponse(HttpExchange exchange, Map<String, Object> data) throws IOException {
+        String method = exchange.getRequestMethod();
+        String path = exchange.getRequestURI().getPath();
         ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
 
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
-        OutputStream os = exchange.getResponseBody();
-        os.write(json.getBytes());
-        os.close();
-    }
+        try {
+            switch (method) {
+                case "GET":
+                    if (path.matches("/vouchers/?")) {
+                        List<Voucher> vouchers = VouchersHandler.getAllVouchers();
+                        SendResponseUtils.sendJsonResponse(exchange, vouchers, "Vouchers retrieved successfully");
+                        return;
 
-    private void sendJsonResponse(HttpExchange exchange, Object data) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(data);
+                    } else if (path.matches("/vouchers/\\d+/?")) {
+                        int id = Integer.parseInt(path.replaceAll("\\D+", ""));
+                        Voucher voucher = VouchersHandler.getVoucherById(id);
+                        SendResponseUtils.sendJsonResponse(exchange, voucher, "Voucher with ID " + id + " retrieved successfully");
+                        return;
 
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, json.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(json.getBytes());
+                    }
+                    break;
+
+                case "POST":
+                    if (path.matches("/vouchers/?")) {
+                        InputStream is = exchange.getRequestBody();
+                        Voucher voucher = mapper.readValue(is, Voucher.class);
+
+                        VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
+
+                        VouchersHandler.insertVoucher(voucher);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Voucher added successfully", voucher, 200, true);
+                        return;
+                    }
+                    break;
+
+                case "PUT":
+                    if (path.matches("/vouchers/\\d+/?")) {
+                        int voucherId = Integer.parseInt(path.split("/")[2]);
+                        InputStream is = exchange.getRequestBody();
+                        Voucher voucher = mapper.readValue(is, Voucher.class);
+                        voucher.setId(voucherId);
+
+                        VouchersHandler.getVoucherById(voucherId);  // check if voucher exist
+                        VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
+
+                        VouchersHandler.updateVoucher(voucher);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Voucher updated successfully", voucher, 200);
+                        return;
+                    }
+                    break;
+
+                case "DELETE":
+                    if (path.matches("/vouchers/\\d+/?")) {
+                        int voucherId = Integer.parseInt(path.split("/")[2]);
+
+                        Voucher voucher = VouchersHandler.getVoucherById(voucherId);    // check if voucher exist
+                        VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
+
+                        VouchersHandler.deleteVoucherById(voucherId);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Voucher deleted successfully", voucher, 200);
+                        return;
+                    }
+                    break;
+
+                default:
+                    SendResponseUtils.sendErrorResponse(exchange, "Method not allowed", 405);
+            }
+        } catch (NotFoundException e) {
+            SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
+        } catch (DatabaseException e) {
+            SendResponseUtils.sendErrorResponse(exchange, "Database error: " + e.getMessage(), 500);
+        } catch (NumberFormatException e) {
+            SendResponseUtils.sendErrorResponse(exchange, "Invalid number format: " + e.getMessage(), 400);
+        } catch (IOException e) {
+            SendResponseUtils.sendErrorResponse(exchange, "I/O error: " + e.getMessage(), 500);
+        } catch (Exception e) {
+            SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
         }
     }
 }

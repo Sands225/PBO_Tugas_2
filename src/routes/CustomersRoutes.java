@@ -3,6 +3,7 @@ package routes;
 import exceptions.*;
 import handlers.*;
 import models.*;
+import validations.BookingValidation;
 import validations.CustomerValidation;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -15,9 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import utils.SendResponseUtils;
-import validations.CustomerValidation;
-
-import static utils.SendResponseUtils.sendResponse;
+import validations.ReviewValidation;
 
 public class CustomersRoutes implements HttpHandler {
     @Override
@@ -25,14 +24,13 @@ public class CustomersRoutes implements HttpHandler {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> response = new HashMap<>();
 
         try {
             switch (method) {
                 case "GET":
                     if (path.matches("/customers/?")) {
                         List<Customer> customers = CustomersHandler.getAllCustomers();
-                        SendResponseUtils.sendJsonResponse(exchange, customers, "Customers record retrieved successfully.");
+                        SendResponseUtils.sendJsonResponse(exchange, customers, "Customers retrieved successfully.");
                         return;
 
                     } else if (path.matches("/customers/\\d+/?")) {
@@ -43,18 +41,23 @@ public class CustomersRoutes implements HttpHandler {
 
                     } else if (path.matches("/customers/\\d+/bookings/?")) {
                         int customerId = Integer.parseInt(path.split("/")[2]);
-                        CustomersHandler.getCustomerById(customerId); // Throws NotFoundException if not found
+
+                        CustomersHandler.getCustomerById(customerId);   // check if customer exist
+
                         List<Map<String, Object>> bookings = BookingsHandler.getBookingsByCustomerId(customerId);
                         SendResponseUtils.sendJsonResponse(exchange, bookings, "Bookings with customer ID " + customerId + " retrieved successfully.");
                         return;
 
                     } else if (path.matches("/customers/\\d+/reviews/?")) {
                         int customerId = Integer.parseInt(path.split("/")[2]);
-                        CustomersHandler.getCustomerById(customerId);
+
+                        CustomersHandler.getCustomerById(customerId);   // check if customer exist
+
                         List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
                         SendResponseUtils.sendJsonResponse(exchange, reviews, "Reviews by customer ID " + customerId + " retrieved successfully.");
                         return;
                     }
+                    SendResponseUtils.sendErrorResponse(exchange, "GET route not found: " + path, 404);
                     break;
 
                 case "POST":
@@ -62,15 +65,10 @@ public class CustomersRoutes implements HttpHandler {
                         InputStream is = exchange.getRequestBody();
                         Customer customer = mapper.readValue(is, Customer.class);
 
-                        CustomerValidation.isCustomerValid(customer);
+                        CustomerValidation.isCustomerValid(customer);   // check if input customer valid
 
-                        boolean success = CustomersHandler.addCustomer(customer);
-                        if (!success) {
-                            throw new RuntimeException("Failed to register customer");
-                        }
-
-                        response.put("message", "Customer registered successfully.");
-                        sendResponse(exchange, response, 200);
+                        CustomersHandler.addCustomer(customer);
+                        SendResponseUtils.sendSuccessResponse(exchange, "customer added successfully", customer, 200, true);
                         return;
 
                     } else if (path.matches("/customers/\\d+/bookings/?")) {
@@ -79,14 +77,11 @@ public class CustomersRoutes implements HttpHandler {
                         Booking booking = mapper.readValue(is, Booking.class);
                         booking.setCustomer(customerId);
 
-                        CustomersHandler.getCustomerById(customerId); // Check existence
+                        CustomersHandler.getCustomerById(customerId);   // check if customer exist
+                        BookingValidation.isBookingValid(booking);      // check if input booking valid
 
-                        if (!BookingsHandler.insertBooking(booking)) {
-                            throw new RuntimeException("Failed to create booking");
-                        }
-
-                        response.put("message", "Booking has been successfully added");
-                        sendResponse(exchange, response, 200);
+                        BookingsHandler.insertBooking(booking);
+                        SendResponseUtils.sendSuccessResponse(exchange, "customer with ID " + customerId + " successfully booked", booking, 200, true);
                         return;
 
                     } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
@@ -96,100 +91,47 @@ public class CustomersRoutes implements HttpHandler {
                         Review review = mapper.readValue(is, Review.class);
                         review.setBooking(bookingId);
 
-                        CustomersHandler.getCustomerById(customerId);
-                        Booking booking = BookingsHandler.getBookingByCustomerAndBookingId(customerId, bookingId);
+                        CustomersHandler.getCustomerById(customerId);   // check if customer exist
+                        BookingsHandler.getBookingByCustomerAndBookingId(customerId, bookingId);    // check if booking with customer exist
+                        ReviewValidation.isReviewValid(review);         // check if input review valid
 
-                        if (!ReviewsHandler.insertBookingReview(review)) {
-                            throw new RuntimeException("Failed to add review");
-                        }
-
-                        response.put("message", "Review has been successfully added");
-                        sendResponse(exchange, response, 200);
+                        ReviewsHandler.insertBookingReview(review);
+                        SendResponseUtils.sendSuccessResponse(exchange, "customer review successfully added to booking with ID " + bookingId, review, 200, true);
                         return;
                     }
+                    SendResponseUtils.sendErrorResponse(exchange, "POST route not found: " + path, 404);
                     break;
 
                 case "PUT":
                     if (path.matches("/customers/\\d+/?")) {
                         int customerId = Integer.parseInt(path.split("/")[2]);
-                        CustomersHandler.getCustomerById(customerId); // check existence
                         InputStream is = exchange.getRequestBody();
                         Customer customer = mapper.readValue(is, Customer.class);
                         customer.setId(customerId);
 
-                        if (!CustomersHandler.updateCustomer(customer)) {
-                            throw new RuntimeException("Failed to update customer");
-                        }
+                        CustomersHandler.getCustomerById(customerId);   // check if customer exist
+                        CustomerValidation.isCustomerValid(customer);   // check if input customer valid
 
-                        response.put("message", "Customer updated successfully");
-                        sendResponse(exchange, response, 200);
+                        CustomersHandler.updateCustomer(customer);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Customer updated successfully", customer, 200);
                         return;
                     }
+                    SendResponseUtils.sendErrorResponse(exchange, "PUT route not found: " + path, 404);
                     break;
+
+                default:
+                    SendResponseUtils.sendErrorResponse(exchange, "Method not allowed", 405);
             }
-
-            else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
-                int customerId = Integer.parseInt(path.split("/")[2]);
-                int bookingId = Integer.parseInt(path.split("/")[4]);
-
-                InputStream is = exchange.getRequestBody();
-                Review review = mapper.readValue(is, Review.class);
-                review.setBooking(bookingId);
-
-                boolean success = ReviewsHandler.insertBookingReview(review);
-                if (success) {
-                    response.put("message", "Review has been successfully added");
-                } else {
-                    sendError(exchange, 400, "Failed to add review");
-                }
-                sendResponse(exchange, response);
-                return;
-            }
-
-        } else if (method.equals("PUT") && path.matches("/customers/\\d+/?")) {
-            int customerId = Integer.parseInt(path.split("/")[2]);
-            InputStream is = exchange.getRequestBody();
-            Customer customer = mapper.readValue(is, Customer.class);
-            customer.setId(customerId);
-
-            if (!CustomerValidation.isNameValid(customer.getName())) {
-                sendError(exchange, 400, "Nama tidak boleh kosong.");
-                return;
-            }
-
-            if (!CustomerValidation.isEmailValid(customer.getEmail())) {
-                sendError(exchange, 400, "Format email tidak valid.");
-                return;
-            }
-
-            if (!CustomerValidation.isPhoneValid(customer.getPhone())) {
-                sendError(exchange, 400, "Nomor telepon tidak valid. Minimal 10 digit angka.");
-                return;
-            }
-
-            boolean success = CustomersHandler.updateCustomer(customer);
-            if (success) {
-                response.put("message", "Customer updated successfully.");
-                sendResponse(exchange, response);
-            } else {
-                sendError(exchange, 404, "Customer tidak ditemukan atau gagal diperbarui.");
-            }
-            return;
-        }
-
-          throw new NotFoundException("Method or route not supported: " + method + " " + path);
-
         }  catch (NotFoundException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 404);
         } catch (IllegalArgumentException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 400);
         } catch (IOException e) {
             SendResponseUtils.sendErrorResponse(exchange, "I/O error: " + e.getMessage(), 500);
-            e.printStackTrace();
         } catch (RuntimeException e) {
             SendResponseUtils.sendErrorResponse(exchange, e.getMessage(), 500);
         } catch (Exception e) {
             SendResponseUtils.sendErrorResponse(exchange, "Unexpected error: " + e.getMessage(), 500);
-            e.printStackTrace();
         }
     }
+}

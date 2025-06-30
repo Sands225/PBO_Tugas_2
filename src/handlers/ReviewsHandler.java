@@ -30,7 +30,7 @@ public class ReviewsHandler {
                 reviews.add(review);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving reviews with villa ID " + villaId, e);
+            throw new DatabaseException("Failed to retrieve reviews with villa ID " + villaId, e);
         }
 
         if (reviews.isEmpty()) {
@@ -60,7 +60,7 @@ public class ReviewsHandler {
                 reviews.add(review);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving reviews with customer ID " + customerId, e);
+            throw new DatabaseException("Failed to retrieve reviews with customer ID " + customerId, e);
         }
 
         if (reviews.isEmpty()) {
@@ -71,7 +71,7 @@ public class ReviewsHandler {
     }
 
     // POST
-    public static boolean insertBookingReview(Review review) {
+    public static void insertBookingReview(Review review) {
         String sql =
                 "INSERT INTO reviews (booking, star, title, content) " +
                 "VALUES (?, ?, ?, ?)";
@@ -82,10 +82,9 @@ public class ReviewsHandler {
             pstmt.setInt(2, review.getStar());
             pstmt.setString(3, review.getTitle());
             pstmt.setString(4, review.getContent());
-
-            return pstmt.executeUpdate() > 0;
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to insert review", e);
+            throw new DatabaseException("Failed to add review", e);
         }
     }
 }
