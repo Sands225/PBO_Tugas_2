@@ -28,7 +28,16 @@ public class VillasRoutes implements HttpHandler {
 
             switch (method) {
                 case "GET":
-                    if (path.matches("/villas/?")) {
+                    if (path.startsWith("/villas") && queryParams.containsKey("ci_date") && queryParams.containsKey("co_date")) {
+                        String checkin = queryParams.get("ci_date");
+                        String checkout = queryParams.get("co_date");
+
+                        List<Villa> availableVillas = VillasHandler.getAvailableVillas(checkin, checkout);
+
+                        SendResponseUtils.sendJsonResponse(exchange, availableVillas, "Available villas in " + checkin + " to " + checkout + " retrieved successfully.");
+                        return;
+
+                    } else if (path.matches("/villas/?")) {
                         List<Villa> villas = VillasHandler.getAllVillas();
                         SendResponseUtils.sendJsonResponse(exchange, villas, "Villas retrieved successfully.");
                         return;
@@ -66,15 +75,6 @@ public class VillasRoutes implements HttpHandler {
                         SendResponseUtils.sendJsonResponse(exchange, reviews, "Reviews in Villa with ID " + villaId + " retrieved successfully.");
                         return;
 
-                    } else if (path.startsWith("/villas") && queryParams.containsKey("ci_date") && queryParams.containsKey("co_date")) {
-                        String checkin = queryParams.get("ci_date");
-                        String checkout = queryParams.get("co_date");
-
-                        List<Map<String, Object>> availableVillas = VillasHandler.getAvailableVillas(checkin, checkout);
-
-                        SendResponseUtils.sendJsonResponse(exchange, availableVillas, "Villa retrieved successfully.");
-                        return;
-
                     }
                     SendResponseUtils.sendErrorResponse(exchange, "GET route not found: " + path, 404);
                 break;
@@ -83,11 +83,12 @@ public class VillasRoutes implements HttpHandler {
                     if (path.matches("/villas/?")) {
                         InputStream is = exchange.getRequestBody();
                         Villa villa = mapper.readValue(is, Villa.class);
+                        System.out.println(villa);
 
                         VillaValidation.isVillaValid(villa);    // check if input villa valid
 
                         VillasHandler.insertVilla(villa);
-                        SendResponseUtils.sendSuccessResponse(exchange, "Villa created successfully", villa, 200);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Villa added successfully", villa, 200, true);
                         return;
 
                     } else if (path.matches("/villas/\\d+/rooms/?")) {
@@ -100,7 +101,7 @@ public class VillasRoutes implements HttpHandler {
                         RoomValidation.isRoomValid(room);       // check if input room valid
 
                         RoomsHandler.insertRoomType(room);
-                        SendResponseUtils.sendSuccessResponse(exchange, "Room successfully added to Villa", room, 200);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Room successfully added to Villa", room, 200, true);
                         return;
 
                     }
