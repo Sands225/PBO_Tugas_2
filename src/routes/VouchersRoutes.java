@@ -47,7 +47,7 @@ public class VouchersRoutes implements HttpHandler {
                         VoucherValidation.isVoucherValid(voucher);  // check if input voucher valid
 
                         VouchersHandler.insertVoucher(voucher);
-                        SendResponseUtils.sendSuccessResponse(exchange, "Voucher created successfully", voucher, 200);
+                        SendResponseUtils.sendSuccessResponse(exchange, "Voucher added successfully", voucher, 200, true);
                         return;
                     }
                     break;

@@ -30,7 +30,7 @@ public class CustomersRoutes implements HttpHandler {
                 case "GET":
                     if (path.matches("/customers/?")) {
                         List<Customer> customers = CustomersHandler.getAllCustomers();
-                        SendResponseUtils.sendJsonResponse(exchange, customers, "Customers record retrieved successfully.");
+                        SendResponseUtils.sendJsonResponse(exchange, customers, "Customers retrieved successfully.");
                         return;
 
                     } else if (path.matches("/customers/\\d+/?")) {
@@ -68,7 +68,7 @@ public class CustomersRoutes implements HttpHandler {
                         CustomerValidation.isCustomerValid(customer);   // check if input customer valid
 
                         CustomersHandler.addCustomer(customer);
-                        SendResponseUtils.sendSuccessResponse(exchange, "customer added successfully", customer, 200);
+                        SendResponseUtils.sendSuccessResponse(exchange, "customer added successfully", customer, 200, true);
                         return;
 
                     } else if (path.matches("/customers/\\d+/bookings/?")) {
@@ -81,7 +81,7 @@ public class CustomersRoutes implements HttpHandler {
                         BookingValidation.isBookingValid(booking);      // check if input booking valid
 
                         BookingsHandler.insertBooking(booking);
-                        SendResponseUtils.sendSuccessResponse(exchange, "customer with ID " + customerId + " successfully booked", booking, 200);
+                        SendResponseUtils.sendSuccessResponse(exchange, "customer with ID " + customerId + " successfully booked", booking, 200, true);
                         return;
 
                     } else if (path.matches("/customers/\\d+/bookings/\\d+/reviews/?")) {
@@ -96,7 +96,7 @@ public class CustomersRoutes implements HttpHandler {
                         ReviewValidation.isReviewValid(review);         // check if input review valid
 
                         ReviewsHandler.insertBookingReview(review);
-                        SendResponseUtils.sendSuccessResponse(exchange, "customer review successfully added to booking with ID " + bookingId, review, 200);
+                        SendResponseUtils.sendSuccessResponse(exchange, "customer review successfully added to booking with ID " + bookingId, review, 200, true);
                         return;
                     }
                     SendResponseUtils.sendErrorResponse(exchange, "POST route not found: " + path, 404);
