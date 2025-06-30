@@ -32,7 +32,7 @@ public class CustomersHandler {
                 throw new NotFoundException("No customers found.");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving customers", e);
+            throw new DatabaseException("Failed to retrieve customers", e);
         }
         return customers;
     }
@@ -51,10 +51,10 @@ public class CustomersHandler {
                         rs.getString("phone")
                 );
             } else {
-                throw new NotFoundException("Villa with ID " + id + " not found.");
+                throw new NotFoundException("Customer with ID " + id + " not found.");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to fetch villa with ID " + id, e);
+            throw new DatabaseException("Failed to retrieve customer with ID " + id, e);
         }
     }
     // POST
@@ -66,8 +66,9 @@ public class CustomersHandler {
             pstmt.setString(1, customer.getName());
             pstmt.setString(2, customer.getEmail());
             pstmt.setString(3, customer.getPhone());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to insert customer", e);
+            throw new DatabaseException("Failed to add customer", e);
         }
     }
 
@@ -80,6 +81,7 @@ public class CustomersHandler {
             pstmt.setString(2, customer.getEmail());
             pstmt.setString(3, customer.getPhone());
             pstmt.setInt(4, customer.getId());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to update customer", e);
         }

@@ -27,11 +27,11 @@ public class VillasHandler {
                 villas.add(villa);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving villas", e);
+            throw new DatabaseException("Failed to retrieve villas", e);
         }
 
         if (villas.isEmpty()) {
-            throw new NotFoundException("No villa found.");
+            throw new NotFoundException("No villa found");
         }
 
         return villas;
@@ -53,10 +53,10 @@ public class VillasHandler {
                         rs.getString("address")
                 );
             } else {
-                throw new NotFoundException("Villa with ID " + id + " not found.");
+                throw new NotFoundException("Villa with ID " + id + " not found");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to fetch villa with ID " + id, e);
+            throw new DatabaseException("Failed to retrieve villa with ID " + id, e);
         }
     }
 
@@ -85,13 +85,11 @@ public class VillasHandler {
                 villas.add(villa);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to fetch available villas", e);
+            throw new DatabaseException("Failed to retrieve available villas", e);
         }
-
         if (villas.isEmpty()) {
             throw new NotFoundException("No available villas found in the selected date range");
         }
-
         return villas;
     }
 
@@ -106,7 +104,7 @@ public class VillasHandler {
             pstmt.setString(3, villa.getAddress());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Error inserting customers", e);
+            throw new DatabaseException("Failed to add villa ", e);
         }
     }
 
@@ -121,7 +119,7 @@ public class VillasHandler {
             pstmt.setInt(4, villa.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Error updating customers", e);
+            throw new DatabaseException("Failed to update villa", e);
         }
     }
 
@@ -133,7 +131,7 @@ public class VillasHandler {
             pstmt.setInt(1, villaId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Error deleting customers", e);
+            throw new DatabaseException("Failed to delete villa", e);
         }
     }
 }

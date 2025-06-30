@@ -39,7 +39,7 @@ public class RoomsHandler {
             }
 
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving rooms for villa ID " + villaId, e);
+            throw new DatabaseException("Failed to retrieve rooms with villa ID " + villaId, e);
         }
         if (rooms.isEmpty()) {
             throw new NotFoundException("No rooms found for villa ID " + villaId);
@@ -78,7 +78,7 @@ public class RoomsHandler {
                 throw new NotFoundException("Room with ID " + roomId + " for villa ID " + villaId + " not found");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving room ID " + roomId + " for villa ID " + villaId, e);
+            throw new DatabaseException("Failed to retrieve room with ID " + roomId + " for villa ID " + villaId, e);
         }
     }
 
@@ -102,8 +102,9 @@ public class RoomsHandler {
             pstmt.setInt(11, room.getHas_shower());
             pstmt.setInt(12, room.getHas_hotwater());
             pstmt.setInt(13, room.getHas_fridge());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to insert room", e);
+            throw new DatabaseException("Failed to add room", e);
         }
     }
 
@@ -128,6 +129,7 @@ public class RoomsHandler {
             pstmt.setInt(12, room.getHas_fridge());
             pstmt.setInt(13, room.getId());
             pstmt.setInt(14, room.getVilla());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to update room ID " + room.getId() + " for villa ID " + room.getVilla(), e);
         }
@@ -141,6 +143,7 @@ public class RoomsHandler {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, roomId);
             pstmt.setInt(2, villaId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to delete room ID " + roomId + " from villa ID " + villaId, e);
         }

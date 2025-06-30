@@ -29,7 +29,7 @@ public class VouchersHandler {
                 vouchers.add(voucher);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving all vouchers", e);
+            throw new DatabaseException("Failed to retrieve vouchers", e);
         }
         if (vouchers.isEmpty()) {
             throw new NotFoundException("No vouchers found");
@@ -59,7 +59,7 @@ public class VouchersHandler {
                 throw new NotFoundException("Voucher with ID " + id + " not found");
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Error retrieving voucher with ID " + id, e);
+            throw new DatabaseException("Failed to retrieve voucher with ID " + id, e);
         }
     }
 
@@ -74,6 +74,7 @@ public class VouchersHandler {
             pstmt.setDouble(3, voucher.getDiscount());
             pstmt.setString(4, voucher.getStart_date());
             pstmt.setString(5, voucher.getEnd_date());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to insert voucher", e);
         }
@@ -91,6 +92,7 @@ public class VouchersHandler {
             pstmt.setString(4, voucher.getStart_date());
             pstmt.setString(5, voucher.getEnd_date());
             pstmt.setInt(6, voucher.getId());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to update voucher with ID " + voucher.getId(), e);
         }
@@ -103,6 +105,7 @@ public class VouchersHandler {
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, voucherId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DatabaseException("Failed to delete voucher with ID " + voucherId, e);
         }

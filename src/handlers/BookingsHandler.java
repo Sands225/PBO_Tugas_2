@@ -104,10 +104,10 @@ public class BookingsHandler {
                 rs.getInt("has_checkedin");
                 rs.getInt("has_checkedout");
             } else {
-                throw new NotFoundException("No bookings found for booking ID " + bookingId + " and customer ID " + customerId);
+                throw new NotFoundException("No booking found for booking ID " + bookingId + " and customer ID " + customerId);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to retrieve bookings with booking ID " + bookingId + " and customer ID " + customerId, e);
+            throw new DatabaseException("Failed to retrieve booking with booking ID " + bookingId + " and customer ID " + customerId, e);
         }
     }
 
@@ -134,8 +134,9 @@ public class BookingsHandler {
             pstmt.setString(8, booking.getPayment_status());
             pstmt.setInt(9, booking.getHas_checkedin());
             pstmt.setInt(10, booking.getHas_checkedout());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DatabaseException("Failed to insert booking", e);
+            throw new DatabaseException("Failed to add booking", e);
         }
     }
 }
