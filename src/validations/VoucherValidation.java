@@ -3,6 +3,8 @@ package validations;
 import models.Voucher;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
@@ -39,8 +41,9 @@ public class VoucherValidation {
 
     public static boolean areDatesValid(String start, String end) {
         try {
-            LocalDate startDate = LocalDate.parse(start);
-            LocalDate endDate = LocalDate.parse(end);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime startDate = LocalDateTime.parse(start, formatter);
+            LocalDateTime endDate = LocalDateTime.parse(end, formatter);
             return !endDate.isBefore(startDate);
         } catch (DateTimeParseException | NullPointerException e) {
             return false;

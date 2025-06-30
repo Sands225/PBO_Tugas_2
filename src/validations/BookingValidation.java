@@ -3,6 +3,8 @@ package validations;
 import models.Booking;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class BookingValidation {
@@ -15,6 +17,9 @@ public class BookingValidation {
             throw new IllegalArgumentException("Room type ID must be a positive integer.");
         }
         if (!areDatesValid(booking.getCheckin_date(), booking.getCheckout_date())) {
+            System.out.println(booking.getCheckin_date());
+
+            System.out.println(booking.getCheckout_date());
             throw new IllegalArgumentException("Check-in date must be today or later and before or equal to check-out date.");
         }
         if (!isPriceValid(booking.getPrice())) {
@@ -44,9 +49,12 @@ public class BookingValidation {
 
     public static boolean areDatesValid(String checkin, String checkout) {
         try {
-            LocalDate checkInDate = LocalDate.parse(checkin);
-            LocalDate checkOutDate = LocalDate.parse(checkout);
-            return !checkInDate.isBefore(LocalDate.now()) && !checkInDate.isAfter(checkOutDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime checkInDateTime = LocalDateTime.parse(checkin, formatter);
+            LocalDateTime checkOutDateTime = LocalDateTime.parse(checkout, formatter);
+            LocalDateTime now = LocalDateTime.now();
+
+            return checkInDateTime.isAfter(now) && !checkInDateTime.isAfter(checkOutDateTime);
         } catch (DateTimeParseException | NullPointerException e) {
             return false;
         }
