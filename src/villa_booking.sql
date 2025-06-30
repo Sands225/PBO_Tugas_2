@@ -74,16 +74,16 @@ INSERT INTO vouchers (id, code, description, discount, start_date, end_date) VAL
 (2, 'BEDUGUL10', '10% off for Bedugul villas', 10.0, '2025-06-15', '2025-09-30');
 
 INSERT INTO room_types (id, villa, name, quantity, capacity, price, bed_size, has_desk, has_ac, has_tv, has_wifi, has_shower, has_hotwater, has_fridge) VALUES
-(2, 1, 'Ricefield View Room', 2, 2, 1050000, 'queen', 1, 1, 1, 1, 1, 1, 1),
-(3, 2, 'Mountain Chill Room', 2, 2, 980000, 'king', 1, 1, 1, 1, 1, 1, 0),
-(4, 1, 'Private Pool Suite', 1, 2, 1600000, 'king', 1, 1, 1, 1, 1, 1, 1),
-(5, 2, 'Lakeside Cottage', 1, 3, 1200000, 'queen', 0, 1, 1, 1, 1, 1, 1);
+(1, 1, 'Ricefield View Room', 2, 2, 1050000, 'queen', 1, 1, 1, 1, 1, 1, 1),
+(2, 2, 'Mountain Chill Room', 2, 2, 980000, 'king', 1, 1, 1, 1, 1, 1, 0),
+(3, 1, 'Private Pool Suite', 1, 2, 1600000, 'king', 1, 1, 1, 1, 1, 1, 1),
+(4, 2, 'Lakeside Cottage', 1, 3, 1200000, 'queen', 0, 1, 1, 1, 1, 1, 1);
 
 INSERT INTO bookings (id, customer, room_type, checkin_date, checkout_date, price, voucher, final_price, payment_status, has_checkedin, has_checkedout) VALUES
-(1, 1, 2, '2025-08-05 14:00:00', '2025-08-08 12:00:00', 1050000, 11, 924000, 'success', 1, 0),
-(2, 2, 3, '2025-09-01 15:00:00', '2025-09-04 11:00:00', 980000, 12, 882000, 'waiting', 0, 0),
-(3, 1, 4, '2025-10-10 13:00:00', '2025-10-12 12:00:00', 3200000, 11, 2816000, 'success', 1, 1),
-(4, 2, 5, '2025-11-20 14:00:00', '2025-11-22 12:00:00', 1200000, 12, 1080000, 'success', 1, 1);
+(1, 1, 2, '2025-08-05 14:00:00', '2025-08-08 12:00:00', 1050000, 1, 924000, 'success', 1, 0),
+(2, 2, 3, '2025-09-01 15:00:00', '2025-09-04 11:00:00', 980000, 2, 882000, 'waiting', 0, 0),
+(3, 1, 4, '2025-10-10 13:00:00', '2025-10-12 12:00:00', 3200000, 1, 2816000, 'success', 1, 1),
+(4, 2, 5, '2025-11-20 14:00:00', '2025-11-22 12:00:00', 1200000, 2, 1080000, 'success', 1, 1);
 
 INSERT INTO reviews (booking, star, title, content) VALUES
 (1, 5, 'Loved the view!', 'Really peaceful in the rice fields.'),
