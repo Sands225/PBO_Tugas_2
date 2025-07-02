@@ -101,7 +101,8 @@ Data baru berhasil ditambahkan, berikut merupakan data dari tabel Voucher
 
 
 # PUT
-Mengupdate data yang sudah ada pada Villa dengan ___
+Mengupdate data yang sudah ada pada Villa dengan 
+![customer - update customer](https://github.com/user-attachments/assets/979fad1d-ea1f-478a-b39e-751c5988a376)
 
 Berikut merupakan hasil data yang sudah di update dengan Villa ___
 
