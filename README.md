@@ -124,5 +124,18 @@ Mengupdate data yang sudah ada pada Voucher berdasarkan ID
 Berikut merupakan hasil data yang sudah di update dengan Voucher ID
 
 # DELETE
+Menghapus data Room Villa yang sudah ada pada Villa berdasarkan Room ID
+![update room](https://github.com/user-attachments/assets/36c96b19-0087-40fe-845e-e12055629a94)
+
+Berikut merupakan hasil data yang sudah di hapus dengan Room ID
+
+Menghapus data yang sudah ada pada Villa berdasarkan Villa ID
+![villa - delete villa](https://github.com/user-attachments/assets/53be5e1d-a5e0-4639-ad51-b86e0b899bf7)
+
+Berikut merupakan hasil data yang sudah di hapus dengan Villa ID
+
+Menghapus data yang sudah ada pada Voucher berdasarkan Voucher ID
+
+Berikut merupakan hasil data yang sudah di hapus dengan Voucher ID
 
 # EROR
