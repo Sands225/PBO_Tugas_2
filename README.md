@@ -104,24 +104,26 @@ Data baru berhasil ditambahkan, berikut merupakan data dari tabel Voucher
 Mengupdate data yang sudah ada pada Villa berdasarkan ID 
 ![update villa](https://github.com/user-attachments/assets/803d8ae7-03d3-4283-9dd7-5231ded72c20)
 
-
 Berikut merupakan hasil data yang sudah di update dengan Villa ID
+
 
 Mengupdate data yang sudah ada pada Customer berdasarkan ID
 ![customer - update customer](https://github.com/user-attachments/assets/979fad1d-ea1f-478a-b39e-751c5988a376)
 
 Berikut merupakan hasil data yang sudah di update dengan customer ID
 
+
 Mengupdate data Room Villa yang sudah ada pada Villa berdasarkan Room ID
 ![update room](https://github.com/user-attachments/assets/17fff1eb-9fdb-419c-8840-b4856378b546)
 
-
 Berikut merupakan hasil data yang sudah di update dengan Room ID 
+
 
 Mengupdate data yang sudah ada pada Voucher berdasarkan ID
 ![voucher - update voucher](https://github.com/user-attachments/assets/ff3280a5-ea06-427d-a508-38389478f5b7)
 
 Berikut merupakan hasil data yang sudah di update dengan Voucher ID
+
 
 # DELETE
 Menghapus data Room Villa yang sudah ada pada Villa berdasarkan Room ID
@@ -129,12 +131,15 @@ Menghapus data Room Villa yang sudah ada pada Villa berdasarkan Room ID
 
 Berikut merupakan hasil data yang sudah di hapus dengan Room ID
 
+
 Menghapus data yang sudah ada pada Villa berdasarkan Villa ID
 ![villa - delete villa](https://github.com/user-attachments/assets/53be5e1d-a5e0-4639-ad51-b86e0b899bf7)
 
 Berikut merupakan hasil data yang sudah di hapus dengan Villa ID
 
+
 Menghapus data yang sudah ada pada Voucher berdasarkan Voucher ID
+![voucher - delete voucher](https://github.com/user-attachments/assets/d47b4689-bab7-4d93-803f-f6820efd54e7)
 
 Berikut merupakan hasil data yang sudah di hapus dengan Voucher ID
 
