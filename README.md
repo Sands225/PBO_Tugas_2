@@ -101,22 +101,25 @@ Data baru berhasil ditambahkan, berikut merupakan data dari tabel Voucher
 
 
 # PUT
-Mengupdate data yang sudah ada pada Villa dengan 
+Mengupdate data yang sudah ada pada Villa berdasarkan ID 
+![update villa](https://github.com/user-attachments/assets/803d8ae7-03d3-4283-9dd7-5231ded72c20)
+
+
+Berikut merupakan hasil data yang sudah di update dengan Villa ID
+
+Mengupdate data yang sudah ada pada Customer berdasarkan ID
 ![customer - update customer](https://github.com/user-attachments/assets/979fad1d-ea1f-478a-b39e-751c5988a376)
 
-Berikut merupakan hasil data yang sudah di update dengan Villa ___
-
-Mengupdate data yang sudah ada pada Customer dengan ___
-
-Berikut merupakan hasil data yang sudah di update dengan customer ___
+Berikut merupakan hasil data yang sudah di update dengan customer ID
 
 Mengupdate data yang sudah ada pada Review dengan ___
 
 Berikut merupakan hasil data yang sudah di update dengan Review ___
 
-Mengupdate data yang sudah ada pada Voucher dengan ___
+Mengupdate data yang sudah ada pada Voucher berdasarkan ID
+![voucher - update voucher](https://github.com/user-attachments/assets/ff3280a5-ea06-427d-a508-38389478f5b7)
 
-Berikut merupakan hasil data yang sudah di update dengan Voucher ___
+Berikut merupakan hasil data yang sudah di update dengan Voucher ID
 
 # DELETE
 
