@@ -26,8 +26,8 @@ Program ini memiliki beberapa package yang digunakan untuk memisahkan class, dia
 
 ### GET
 
-Mendapatkan record Seluruh Villa
-- Method : ```GET```
+Mendapatkan record Seluruh Villa 
+- Method : ```GET``` 
 - Endpoint : ```/villas```
 ![villa - get all villa](https://github.com/user-attachments/assets/c294f6ab-e504-40ca-b612-1ce398929faf)
 
@@ -38,7 +38,7 @@ Mendapatkan record Villa berdasarkan ID
 
 Mendapatkan record Villa yang tersedia dalam rentang waktu tertentu
 - Method : ```GET```
-- Endpoint :```/villas?ci_date=2020-08-06&co_date=2030-10-31````
+- Endpoint :```/villas?ci_date=2020-08-06&co_date=2030-10-31```
 ![villa - get available villas](https://github.com/user-attachments/assets/b80c872e-73cc-4b8a-a57e-e839ca452ba9)
 
 Mendapatkan record review Villa
@@ -95,7 +95,7 @@ Menambahkan data baru pada Villa
 
 Menambahkan data baru pada Room
 - Method : ```POST```
-- Endpoint : ```/villas```
+- Endpoint : ```/villas/3/rooms```
 ![villa - add room](https://github.com/user-attachments/assets/a7771291-db33-4db3-98c1-835ba7da3c53)
 
 Menambahkan data baru pada Customer
@@ -105,12 +105,12 @@ Menambahkan data baru pada Customer
 
 Menambahkan data Booking baru oleh Customer
 - Method : ```POST```
-- Endpoint : ```/customers```
+- Endpoint : ```/customers/3/bookings/```
 ![customer - add booking](https://github.com/user-attachments/assets/6768b765-14c2-4964-b6b7-992a39ed4c6e)
 
 Menambahkan data baru pada Review
 - Method : ```POST```
-- Endpoint : ```/reviews```
+- Endpoint : ```customers/3/bookings/5/reviews/```
 ![customer - add review](https://github.com/user-attachments/assets/2dc58f34-ebee-4dfd-89c2-83007c1f2626)
 
 Menambahkan data baru pada Voucher
@@ -122,12 +122,12 @@ Menambahkan data baru pada Voucher
 ### PUT
 Mengupdate data yang sudah ada pada Villa berdasarkan ID 
 - Method : ```PUT```
-- Endpoint : ```/villa```
+- Endpoint : ```/villas/3```
 ![update villa](https://github.com/user-attachments/assets/803d8ae7-03d3-4283-9dd7-5231ded72c20)
 
 Mengupdate data yang sudah ada pada Customer berdasarkan ID
 - Method : ```PUT```
-- Endpoint : ```/customers```
+- Endpoint : ```/customers/3```
 ![customer - update customer](https://github.com/user-attachments/assets/979fad1d-ea1f-478a-b39e-751c5988a376)
 
 Mengupdate data Room Villa yang sudah ada pada Villa berdasarkan Room ID
