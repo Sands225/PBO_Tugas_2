@@ -15,22 +15,6 @@ import java.util.Map;
 
 public class SendResponseUtils {
 
-    public static void sendJsonResponse(HttpExchange exchange, Object data, String message) throws IOException {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", "success");
-        response.put("message", message);
-        response.put("data", data);
-
-        String json = new ObjectMapper().writeValueAsString(response);
-
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-        exchange.sendResponseHeaders(200, json.getBytes(StandardCharsets.UTF_8).length);
-
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(json.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
     public static void sendResponse(HttpExchange exchange, Object data, int statusCode) throws IOException {
         String responseJson = new ObjectMapper().writeValueAsString(data);
         byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);

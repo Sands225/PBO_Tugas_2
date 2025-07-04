@@ -27,13 +27,13 @@ public class VouchersRoutes implements HttpHandler {
                 case "GET":
                     if (path.matches("/vouchers/?")) {
                         List<Voucher> vouchers = VouchersHandler.getAllVouchers();
-                        SendResponseUtils.sendJsonResponse(exchange, vouchers, "Vouchers retrieved successfully");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Vouchers retrieved successfully", vouchers, 200);
                         return;
 
                     } else if (path.matches("/vouchers/\\d+/?")) {
                         int id = Integer.parseInt(path.replaceAll("\\D+", ""));
                         Voucher voucher = VouchersHandler.getVoucherById(id);
-                        SendResponseUtils.sendJsonResponse(exchange, voucher, "Voucher with ID " + id + " retrieved successfully");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Voucher with ID " + id + " retrieved successfully", voucher, 200);
                         return;
 
                     }
