@@ -33,27 +33,27 @@ Mendapatkan record Seluruh Villa
 
 Mendapatkan record Villa berdasarkan ID
 - Method : ```GET```
-- Endpoint : ```/villas```
+- Endpoint : ```/villas/3```
 ![villa - get villa](https://github.com/user-attachments/assets/fbb18580-a900-416a-b2d3-9b05e2f111c3)
 
-Mendapatkan record Villa available
+Mendapatkan record Villa yang tersedia dalam rentang waktu tertentu
 - Method : ```GET```
-- Endpoint : ```/villas```
+- Endpoint :```/villas?ci_date=2020-08-06&co_date=2030-10-31````
 ![villa - get available villas](https://github.com/user-attachments/assets/b80c872e-73cc-4b8a-a57e-e839ca452ba9)
 
 Mendapatkan record review Villa
 - Method : ```GET```
-- Endpoint : ```/villas```
+- Endpoint : ```/villas/2/reviews```
 ![villa - get review](https://github.com/user-attachments/assets/ea5b69e0-7e84-4a68-a92d-6c60e6aebff2)
 
 Untuk mendapatkan record booking Villa
 - Method : ```GET```
-- Endpoint : ```/villas```
+- Endpoint : ```/villas/2/bookings```
 ![villa - get booking](https://github.com/user-attachments/assets/cd14660a-e6d5-4bb9-b454-789faebc570b)
 
 Mendapatkan record room Villa
 - Method : ```GET```
-- Endpoint : ```/villas```
+- Endpoint : ```/villas/3/rooms```
 ![villa - get room](https://github.com/user-attachments/assets/150bb4a4-db00-4d6f-a05e-11f1272c256b)
 
 Mendapatkan record Seluruh Customer
@@ -63,17 +63,17 @@ Mendapatkan record Seluruh Customer
 
 Mendapatkan record Customer berdasarkan ID
 - Method : ```GET```
-- Endpoint : ```/customers```
+- Endpoint : ```/customers/3```
 ![customer - get customer](https://github.com/user-attachments/assets/9989a560-60bf-48c1-a4c3-b75997d72418)
 
 Mendapatkan record booking Customer
 - Method : ```GET```
-- Endpoint : ```/customers```
+- Endpoint : ```/customers/3/bookings```
 ![customer - get booking](https://github.com/user-attachments/assets/c7587214-de5a-40e0-b2d0-bd912d4bdc28)
 
 Mendapatkan record review Customer
 - Method : ```GET```
-- Endpoint : ```/customers```
+- Endpoint : ```/customers/3/reviews```
 ![customer - get review](https://github.com/user-attachments/assets/9f1e245f-bd73-45aa-9513-a5f16a8a3310)
 
 Mendapatkan record seluruh Voucher
@@ -83,7 +83,7 @@ Mendapatkan record seluruh Voucher
 
 Mendapatkan record Voucher berdasarkan ID
 - Method : ```GET```
-- Endpoint : ```/vouchers```
+- Endpoint : ```/vouchers/3```
 ![voucher - get voucher](https://github.com/user-attachments/assets/78bfcccf-8f66-4bac-83c4-ee6a0b22e00b)
 
 
