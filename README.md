@@ -31,6 +31,44 @@ Program ini memiliki beberapa package yang digunakan untuk memisahkan class, dia
 ---
 
 ## Panduan Program
+### 1. Persiapan
+Sebelum menjalankan program, pastikan komputer telah menginstal:
+- Java JDK versi 11 atau lebih tinggi
+- SQLite (untuk inisialisasi database)
+- IDE seperti IntelliJ IDEA atau VS Code, atau dapat juga di run pada terminal
+- Postman (untuk pengujian API)
+
+### 2. Cara Menjalankan Program
+#### 2.1 Inisialisasi Database
+- Buka terminal dan arahkan ke direktori utama proyek, lalu jalankan perintah berikut: \
+  ```sqlite3 src/vbook.db < src/villa_booking.sql``` \
+  Perintah tersebut akan membuat file `vbook.db` dan mengisi struktur tabel serta dummy data dari file SQL
+#### 2.2 Menjalankan Program
+  
+  - Menggunakan IDE (IntelliJ)
+    - Buka proyek melalui menu File → Open
+    - Buka file Main.java dan jalankan program
+
+  - Menggunakan terminal
+    - Arahkan terminal pada dimana folder tersimpan, lalu jalankan program dengan menggunakan perintah berikut: \
+    - Perintah kompilasi program \
+    ```javac -d out -cp "lib/*" src/Main.java src/http/*.java src/routes/*.java src/models/*.java src/handlers/*.java src/db/Database.java src/db/*.java src/exceptions/*.java src/utils/*.java src/validations/*.java``` \
+
+    - Perintah menjalankan program \
+    ```java -cp "out;lib/*" Main```
+
+- Jika berhasil, server akan berjalan di http://localhost:8080
+
+### 3. Pengujian API
+- Gunakan Postman untuk mengakses dan menguji endpoint API.
+- Semua endpoint membutuhkan autentikasi menggunakan API Key:
+  - Auth type: API Key
+  - Key : X-API-KEY
+  - Value : '123-SECRET-KEY'
+  - Add to : Header
+  // Gambar
+  
+---
 
 ## Dokumentasi Endpoint
 
