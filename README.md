@@ -1,15 +1,21 @@
-# PBO_Tugas_2
+# Villa Booking API - Tugas 2 PBO
 Hai! Selamat datang di program Sederhana kami.
 
-# Pembuatan API Pemesanan Villa Sederhana Berbasis Java
+---
+
+## Pembuatan API Pemesanan Villa Sederhana Berbasis Java
 <div align="justify">Proyek ini merupakan API Pemesanan Villa Sederhana Berbasis Java yang kami buat dengan tujuan untuk menguasai dasar-dasar pemrograman berorientasi objek, meningkatkan keterampilan pemrograman dengan Java, melatih kerja sama tim, serta memenuhi syarat Tugas 2 pada Mata Kuliah Pemrograman Berorientasi Objek. API digunakan untuk melakukan manipulasi data pada tiap entitas dari database dan mengatur GET, POST, PUT, DELETE. Response yang diberikan oleh server API menggunakan format JSON serta data disimpan pada Database SQLite. Untuk pengujian aplikasi dilakukan pada aplikasi Postman.
 
+---
+
 ## Identitas Kontributor
-Mata Kuliah : Pemrograman Berbasis Obyek E 
+**Mata Kuliah** : Pemrograman Berbasis Obyek E 
 - I Gusti Bagus Eri Widura  ( 2405551054 ) 
 - I Made Sandika Wijaya	    ( 2405551082 ) 
 - I Gede Puterayasa	        ( 2405551088 ) 
 - I Wayan Arya Wikananda    ( 2405551090 )
+
+---
 
 ## Panduan Sederhana
 Program ini memiliki beberapa package yang digunakan untuk memisahkan class, diantaranya
@@ -18,9 +24,11 @@ Program ini memiliki beberapa package yang digunakan untuk memisahkan class, dia
 - db          : Mengelola koneksi dan utilitas database SQLite.
 - handlers    : Menjalankan query database seperti SELECT, INSERT, dan DELETE.
 - routes      : Menangani request dari client dan mengatur logika endpoint.
-- utils       : Berisi fungsi bantu, seperti sendResponse.
+- utils       : Berisi fungsi bantu, seperti `sendResponse`.
 - validations : Menyediakan fungsi validasi data dari client.
 - exceptions  : Menyimpan custom exception untuk penanganan error.
+
+---
 
 ## Dokumentasi Endpoint
 
@@ -62,7 +70,7 @@ Mendapatkan record room Villa
   
 ![villa - get room](https://github.com/user-attachments/assets/150bb4a4-db00-4d6f-a05e-11f1272c256b)
 
-Mendapatkan record Seluruh Customer
+Mendapatkan record seluruh Customer
 - Method : ```GET```
 - Endpoint : ```/customers```
   
@@ -120,13 +128,13 @@ Menambahkan data baru pada Customer
 
 Menambahkan data Booking baru oleh Customer
 - Method : ```POST```
-- Endpoint : ```/customers/3/bookings/```
+- Endpoint : ```/customers/3/bookings```
   
 ![customer - add booking](https://github.com/user-attachments/assets/6768b765-14c2-4964-b6b7-992a39ed4c6e)
 
 Menambahkan data baru pada Review
 - Method : ```POST```
-- Endpoint : ```customers/3/bookings/5/reviews/```
+- Endpoint : ```customers/3/bookings/5/reviews```
   
 ![customer - add review](https://github.com/user-attachments/assets/2dc58f34-ebee-4dfd-89c2-83007c1f2626)
 
@@ -182,23 +190,25 @@ Menghapus data yang sudah ada pada Voucher berdasarkan Voucher ID
 ![voucher - delete voucher](https://github.com/user-attachments/assets/d47b4689-bab7-4d93-803f-f6820efd54e7)
 </div>
 
+---
 
-### ERORR
-Erorr End Point Not Found
-- Method : 
-- Endpoint :
-  
-![Endpoint Not Found](https://github.com/user-attachments/assets/1cdea492-73bc-46cf-8086-44767495a7dd)
+### ERROR TESTING
 
-Erorr Invalid API Key
-- Method : 
-- Endpoint :
+Invalid API Key
+- Method : ```GET```
+- Endpoint : ```/villas```
 
 ![invalid API KEY](https://github.com/user-attachments/assets/40bc27db-72e2-4dc6-871d-14b93ad7a704)
 
+Endpoint Not Found
+- Method : ```GET```
+- Endpoint : ```/villas/hehe```
+
+![Endpoint Not Found](https://github.com/user-attachments/assets/955a07e0-b075-423f-bb49-32e254b93507)
+
 Erorr Method Not Allowed
-- Method : 
-- Endpoint :
+- Method : ```PATCH```
+- Endpoint : ```/villas```
 
 ![Method Not Allowed](https://github.com/user-attachments/assets/0341351f-f418-4eb4-94f9-b073726ffdd7)
 
