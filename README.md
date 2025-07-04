@@ -146,25 +146,25 @@ Menambahkan data baru pada Voucher
 
 
 ### PUT
-Mengupdate data yang sudah ada pada Villa berdasarkan ID 
+Mengubah data yang sudah ada pada Villa berdasarkan ID 
 - Method : ```PUT```
 - Endpoint : ```/villas/3```
   
 ![update villa](https://github.com/user-attachments/assets/803d8ae7-03d3-4283-9dd7-5231ded72c20)
 
-Mengupdate data yang sudah ada pada Customer berdasarkan ID
+Mengubah data yang sudah ada pada Customer berdasarkan ID
 - Method : ```PUT```
 - Endpoint : ```/customers/3```
   
 ![customer - update customer](https://github.com/user-attachments/assets/979fad1d-ea1f-478a-b39e-751c5988a376)
 
-Mengupdate data Room Villa yang sudah ada pada Villa berdasarkan Room ID
+Mengubah data Room Villa yang sudah ada pada Villa berdasarkan Room ID
 - Method : ```PUT```
 - Endpoint : ```/villa```
   
 ![update room](https://github.com/user-attachments/assets/17fff1eb-9fdb-419c-8840-b4856378b546)
 
-Mengupdate data yang sudah ada pada Voucher berdasarkan ID
+Mengubah data yang sudah ada pada Voucher berdasarkan ID
 - Method : ```PUT```
 - Endpoint : ```/vouchers```
   
