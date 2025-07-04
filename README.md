@@ -12,7 +12,15 @@ Mata Kuliah : Pemrograman Berbasis Obyek E
 - I Wayan Arya Wikananda    ( 2405551090 )
 
 # Panduan Sederhana
-Program ini memiliki 3 type kelas, yakni class untuk pertama yaitu class untuk masing-masing Entitas yang terletak pada package model, class untuk keperluan API dan HTTP Server pada package httpserver dan class untuk keperluan database pada package ___.
+Program ini memiliki beberapa package yang digunakan untuk memisahkan class, diantaranya
+- models      : Berisi class entitas utama, seperti `Villa`, `Room`, `Customer`, `Booking`,`Voucher`, dan `Review`.
+- http        : Berisi konfigurasi HTTP server.
+- db          : Mengelola koneksi dan utilitas database SQLite.
+- handlers    : Menjalankan query database seperti SELECT, INSERT, dan DELETE.
+- routes      : Menangani request dari client dan mengatur logika endpoint.
+- utils       : Berisi fungsi bantu, seperti sendResponse.
+- validations : Menyediakan fungsi validasi data dari client.
+- exceptions  : Menyimpan custom exception untuk penanganan error.
 
 # GET
 
