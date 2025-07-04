@@ -30,13 +30,13 @@ public class CustomersRoutes implements HttpHandler {
                 case "GET":
                     if (path.matches("/customers/?")) {
                         List<Customer> customers = CustomersHandler.getAllCustomers();
-                        SendResponseUtils.sendJsonResponse(exchange, customers, "Customers retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Customers retrieved successfully.", customers, 200);
                         return;
 
                     } else if (path.matches("/customers/\\d+/?")) {
                         int id = Integer.parseInt(path.split("/")[2]);
                         Customer customer = CustomersHandler.getCustomerById(id);
-                        SendResponseUtils.sendJsonResponse(exchange, customer, "Customer with ID " + id + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Customer with ID " + id + " retrieved successfully.", customer, 200);
                         return;
 
                     } else if (path.matches("/customers/\\d+/bookings/?")) {
@@ -45,7 +45,7 @@ public class CustomersRoutes implements HttpHandler {
                         CustomersHandler.getCustomerById(customerId);   // check if customer exist
 
                         List<Map<String, Object>> bookings = BookingsHandler.getBookingsByCustomerId(customerId);
-                        SendResponseUtils.sendJsonResponse(exchange, bookings, "Bookings with customer ID " + customerId + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Bookings with customer ID " + customerId + " retrieved successfully.", bookings, 200);
                         return;
 
                     } else if (path.matches("/customers/\\d+/reviews/?")) {
@@ -54,7 +54,7 @@ public class CustomersRoutes implements HttpHandler {
                         CustomersHandler.getCustomerById(customerId);   // check if customer exist
 
                         List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByCustomerId(customerId);
-                        SendResponseUtils.sendJsonResponse(exchange, reviews, "Reviews by customer ID " + customerId + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Reviews by customer ID " + customerId + " retrieved successfully.", reviews, 200);
                         return;
                     }
                     SendResponseUtils.sendErrorResponse(exchange, "GET route not found: " + path, 404);

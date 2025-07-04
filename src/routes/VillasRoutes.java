@@ -34,18 +34,18 @@ public class VillasRoutes implements HttpHandler {
 
                         List<Villa> availableVillas = VillasHandler.getAvailableVillas(checkin, checkout);
 
-                        SendResponseUtils.sendJsonResponse(exchange, availableVillas, "Available villas in " + checkin + " to " + checkout + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Available villas in " + checkin + " to " + checkout + " retrieved successfully.", availableVillas, 200);
                         return;
 
                     } else if (path.matches("/villas/?")) {
                         List<Villa> villas = VillasHandler.getAllVillas();
-                        SendResponseUtils.sendJsonResponse(exchange, villas, "Villas retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Villas retrieved successfully.", villas, 200);
                         return;
 
                     } else if (path.matches("/villas/\\d+/?")) {
                         int id = Integer.parseInt(path.replaceAll("\\D+", ""));
                         Villa villa = VillasHandler.getVillaById(id);
-                        SendResponseUtils.sendJsonResponse(exchange, villa, "Villa with ID " + id + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Villa with ID " + id + " retrieved successfully.", villa, 200);
                         return;
 
                     } else if (path.matches("/villas/\\d+/rooms/?")) {
@@ -54,7 +54,7 @@ public class VillasRoutes implements HttpHandler {
                         VillasHandler.getVillaById(villaId);    // check if villa exist
 
                         List<Room> rooms = RoomsHandler.getRoomsByVillaId(villaId);
-                        SendResponseUtils.sendJsonResponse(exchange, rooms, "Rooms in Villa with ID " + villaId + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Rooms in Villa with ID " + villaId + " retrieved successfully.", rooms, 200);
                         return;
 
                     } else if (path.matches("/villas/\\d+/bookings/?")) {
@@ -63,7 +63,7 @@ public class VillasRoutes implements HttpHandler {
                         VillasHandler.getVillaById(villaId);    // check if villa exist
 
                         List<Map<String, Object>> bookings = BookingsHandler.getBookingsByVillaId(villaId);
-                        SendResponseUtils.sendJsonResponse(exchange, bookings, "Bookings in Villa with ID " + villaId + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Bookings in Villa with ID " + villaId + " retrieved successfully.", bookings, 200);
                         return;
 
                     } else if (path.matches("/villas/\\d+/reviews/?")) {
@@ -72,7 +72,7 @@ public class VillasRoutes implements HttpHandler {
                         VillasHandler.getVillaById(villaId);    // check if villa exist
 
                         List<Map<String, Object>> reviews = ReviewsHandler.getReviewsByVillaId(villaId);
-                        SendResponseUtils.sendJsonResponse(exchange, reviews, "Reviews in Villa with ID " + villaId + " retrieved successfully.");
+                        SendResponseUtils.sendSuccessResponse(exchange, "Reviews in Villa with ID " + villaId + " retrieved successfully.", reviews, 200);
                         return;
 
                     }
