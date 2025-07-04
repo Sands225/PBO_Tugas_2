@@ -17,7 +17,7 @@ Hai! Selamat datang di program Sederhana kami.
 
 ---
 
-## Panduan Sederhana
+## Struktur Program
 Program ini memiliki beberapa package yang digunakan untuk memisahkan class, diantaranya
 - models      : Berisi class entitas utama, seperti `Villa`, `Room`, `Customer`, `Booking`,`Voucher`, dan `Review`.
 - http        : Berisi konfigurasi HTTP server.
@@ -29,6 +29,8 @@ Program ini memiliki beberapa package yang digunakan untuk memisahkan class, dia
 - exceptions  : Menyimpan custom exception untuk penanganan error.
 
 ---
+
+## Panduan Program
 
 ## Dokumentasi Endpoint
 
