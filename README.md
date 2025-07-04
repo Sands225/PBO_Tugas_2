@@ -49,19 +49,19 @@ Sebelum menjalankan program, pastikan komputer telah menginstal:
     - Buka proyek melalui menu File → Open
     - Buka file Main.java dan jalankan program
     
-    ![WhatsApp Image 2025-07-04 at 18 55 35_7ac10eea](https://github.com/user-attachments/assets/1a090ea2-0c0f-4aa3-90e1-e45b10d38f7b)
+    ![Screenshot 2025-07-04 181904](https://github.com/user-attachments/assets/c44f9cdc-1b08-40a2-b67c-19a6cca69a34)
 
 
   - Menggunakan terminal
-    - Arahkan terminal pada dimana folder tersimpan, lalu jalankan program dengan menggunakan perintah berikut: \
+    - Arahkan terminal pada dimana folder tersimpan, lalu jalankan program dengan menggunakan perintah berikut:
     - Perintah kompilasi program \
-    ```javac -d out -cp "lib/*" src/Main.java src/http/*.java src/routes/*.java src/models/*.java src/handlers/*.java src/db/Database.java src/db/*.java src/exceptions/*.java src/utils/*.java src/validations/*.java``` \
+    ```javac -d out -cp "lib/*" src/Main.java src/http/*.java src/routes/*.java src/models/*.java src/handlers/*.java src/db/Database.java src/db/*.java src/exceptions/*.java src/utils/*.java src/validations/*.java```
     
     - Perintah menjalankan program \
     ```java -cp "out;lib/*" Main```
-
-    ![Screenshot 2025-07-04 181904](https://github.com/user-attachments/assets/c44f9cdc-1b08-40a2-b67c-19a6cca69a34)
-
+    
+    ![WhatsApp Image 2025-07-04 at 18 55 35_7ac10eea](https://github.com/user-attachments/assets/1a090ea2-0c0f-4aa3-90e1-e45b10d38f7b)
+   
 - Jika berhasil, server akan berjalan di http://localhost:8080
 
 ### 3. Pengujian API
