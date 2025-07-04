@@ -65,13 +65,15 @@ Sebelum menjalankan program, pastikan komputer telah menginstal:
 - Jika berhasil, server akan berjalan di http://localhost:8080
 
 ### 3. Pengujian API
-- Gunakan Postman untuk mengakses dan menguji endpoint API.
-- Semua endpoint membutuhkan autentikasi menggunakan API Key:
+- Postman digunakan untuk mengakses dan menguji endpoint API
+- Setiap endpoint membutuhkan autentikasi menggunakan API Key:
+
   - Auth type: API Key
   - Key : X-API-KEY
   - Value : '123-SECRET-KEY'
   - Add to : Header
-  // Gambar
+  
+  ![Screenshot 2025-07-04 183856](https://github.com/user-attachments/assets/bdab1cf4-6336-4ef2-8b8a-c29fec66c360)
   
 ---
 
