@@ -19,14 +19,14 @@ Hai! Selamat datang di program Sederhana kami.
 
 ## Struktur Program
 Program ini memiliki beberapa package yang digunakan untuk memisahkan class, diantaranya
-- models      : Berisi class entitas utama, seperti `Villa`, `Room`, `Customer`, `Booking`,`Voucher`, dan `Review`.
-- http        : Berisi konfigurasi HTTP server.
-- db          : Mengelola koneksi dan utilitas database SQLite.
-- handlers    : Menjalankan query database seperti SELECT, INSERT, dan DELETE.
-- routes      : Menangani request dari client dan mengatur logika endpoint.
-- utils       : Berisi fungsi bantu, seperti `sendResponse`.
-- validations : Menyediakan fungsi validasi data dari client.
-- exceptions  : Menyimpan custom exception untuk penanganan error.
+- **models**  : Berisi class entitas utama, seperti `Villa`, `Room`, `Customer`, `Booking`,`Voucher`, dan `Review`.
+- **http**    : Berisi konfigurasi HTTP server.
+- **db**      : Mengelola koneksi dan utilitas database SQLite.
+- **handlers**: Menjalankan query database seperti SELECT, INSERT, dan DELETE.
+- **routes**  : Menangani request dari client dan mengatur logika endpoint.
+- **utils**   : Berisi fungsi bantu, seperti `sendResponse`.
+- **validations**: Menyediakan fungsi validasi data dari client.
+- **exceptions** : Menyimpan custom exception untuk penanganan error.
 
 ---
 
