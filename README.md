@@ -4,14 +4,14 @@ Hai! Selamat datang di program Sederhana kami.
 # Pembuatan API Pemesanan Villa Sederhana Berbasis Java
 <div align="justify">Proyek ini merupakan API Pemesanan Villa Sederhana Berbasis Java yang kami buat dengan tujuan untuk menguasai dasar-dasar pemrograman berorientasi objek, meningkatkan keterampilan pemrograman dengan Java, melatih kerja sama tim, serta memenuhi syarat Tugas 2 pada Mata Kuliah Pemrograman Berorientasi Objek. API digunakan untuk melakukan manipulasi data pada tiap entitas dari database dan mengatur GET, POST, PUT, DELETE. Response yang diberikan oleh server API menggunakan format JSON serta data disimpan pada Database SQLite. Untuk pengujian aplikasi dilakukan pada aplikasi Postman.
 
-# Identitas Kontributor
+## Identitas Kontributor
 Mata Kuliah : Pemrograman Berbasis Obyek E 
 - I Gusti Bagus Eri Widura  ( 2405551054 ) 
 - I Made Sandika Wijaya	    ( 2405551082 ) 
 - I Gede Puterayasa	        ( 2405551088 ) 
 - I Wayan Arya Wikananda    ( 2405551090 )
 
-# Panduan Sederhana
+## Panduan Sederhana
 Program ini memiliki beberapa package yang digunakan untuk memisahkan class, diantaranya
 - models      : Berisi class entitas utama, seperti `Villa`, `Room`, `Customer`, `Booking`,`Voucher`, dan `Review`.
 - http        : Berisi konfigurasi HTTP server.
@@ -22,7 +22,9 @@ Program ini memiliki beberapa package yang digunakan untuk memisahkan class, dia
 - validations : Menyediakan fungsi validasi data dari client.
 - exceptions  : Menyimpan custom exception untuk penanganan error.
 
-# GET
+## Dokumentasi Endpoint
+
+### GET
 
 Mendapatkan record Seluruh Villa
 - Method : ```GET```
@@ -85,7 +87,7 @@ Mendapatkan record Voucher berdasarkan ID
 ![voucher - get voucher](https://github.com/user-attachments/assets/78bfcccf-8f66-4bac-83c4-ee6a0b22e00b)
 
 
-# POST
+### POST
 Menambahkan data baru pada Villa
 - Method : ```POST```
 - Endpoint : ```/villas```
@@ -117,7 +119,7 @@ Menambahkan data baru pada Voucher
 ![voucher - add voucher](https://github.com/user-attachments/assets/032c1a64-e093-4391-96ea-b78d189d9af2)
 
 
-# PUT
+### PUT
 Mengupdate data yang sudah ada pada Villa berdasarkan ID 
 - Method : ```PUT```
 - Endpoint : ```/villa```
@@ -138,7 +140,7 @@ Mengupdate data yang sudah ada pada Voucher berdasarkan ID
 - Endpoint : ```/vouchers```
 ![voucher - update voucher](https://github.com/user-attachments/assets/ff3280a5-ea06-427d-a508-38389478f5b7)
 
-# DELETE
+### DELETE
 Menghapus data Room Villa yang sudah ada pada Villa berdasarkan Room ID
 - Method : ```DELETE```
 - Endpoint : ```/villa```
