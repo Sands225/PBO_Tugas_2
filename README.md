@@ -143,16 +143,19 @@ Mengupdate data yang sudah ada pada Voucher berdasarkan ID
 ### DELETE
 Menghapus data Room Villa yang sudah ada pada Villa berdasarkan Room ID
 - Method : ```DELETE```
-- Endpoint : ```/villa```
+- Endpoint : ```/villas/3/rooms/5```
 ![update room](https://github.com/user-attachments/assets/36c96b19-0087-40fe-845e-e12055629a94)
 
 Menghapus data yang sudah ada pada Villa berdasarkan Villa ID
 - Method : ```DELETE```
-- Endpoint : ```/villa```
+- Endpoint : ```/villas/3```
 ![villa - delete villa](https://github.com/user-attachments/assets/53be5e1d-a5e0-4639-ad51-b86e0b899bf7)
 
 Menghapus data yang sudah ada pada Voucher berdasarkan Voucher ID
 - Method : ```DELETE```
-- Endpoint : ```/vouchers```
+- Endpoint : ```/vouchers/3```
 ![voucher - delete voucher](https://github.com/user-attachments/assets/d47b4689-bab7-4d93-803f-f6820efd54e7)
 </div>
+
+
+### ERORR
