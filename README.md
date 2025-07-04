@@ -58,7 +58,7 @@ Mendapatkan record review Villa
   
 ![villa - get review](https://github.com/user-attachments/assets/ea5b69e0-7e84-4a68-a92d-6c60e6aebff2)
 
-Untuk mendapatkan record booking Villa
+mendapatkan record booking Villa
 - Method : ```GET```
 - Endpoint : ```/villas/2/bookings```
   
